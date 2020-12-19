@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+ 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>    
@@ -64,12 +65,13 @@
 
   
   <ItemGroup>
-    <None Update="figlet\small">
+    <None Update="figlet\small" Pack="true" >
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="figlet\smisome1">
+    <None Update="figlet\smisome1" Pack="true">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="images\logo.png" Pack="true" PackagePath="" />
   </ItemGroup>
 
   

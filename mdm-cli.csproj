@@ -53,13 +53,18 @@
   
 
   <ItemGroup>
-    <PackageReference Include="Colorful.Console" Version="1.2.11" />
+    <PackageReference Include="Colorful.Console" Version="1.2.15" />
     <PackageReference Include="CommandLineParser" Version="2.8.0" />
     <PackageReference Include="Cosmonaut" Version="2.11.3" />
     <PackageReference Include="LibGit2Sharp" Version="0.26.2" />
     <PackageReference Include="TypeGen" Version="2.4.9" />
     <PackageReference Include="trifenix.connect" Version="0.8.56" />
-    <PackageReference Include="trifenix.connect.mdm" Version="0.8.47" />
+  </ItemGroup>
+
+  
+
+  <ItemGroup>
+    <ProjectReference Include="..\mdm\trifenix.connect.mdm.csproj" />
   </ItemGroup>
 
   

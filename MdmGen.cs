@@ -32,10 +32,10 @@ namespace mdm_gen
         /// Borra recursivamente una carpeta
         /// </summary>
         /// <param name="baseDir">carpeta a borrar</param>
-        public static void RecursiveDelete(DirectoryInfo baseDir)
+        public static bool RecursiveDelete(DirectoryInfo baseDir)
         {
             if (!baseDir.Exists)
-                return;
+                return false;
 
             foreach (var dir in baseDir.EnumerateDirectories())
             {
@@ -45,6 +45,8 @@ namespace mdm_gen
 
             var files = baseDir.GetFiles();
 
+            if (!files.Any()) return false;
+
 
             foreach (var file in files)
             {
@@ -52,11 +54,12 @@ namespace mdm_gen
                 file.Delete();
             }
             baseDir.Delete();
+            return true;
         }
 
 
 
-        public static void StageCommitPush(string gitAddress, string email, string username, string folder, string branch, Dictionary<string, Action> commitMessageFileOperations) {
+        public static void StageCommitPush(string gitAddress, string email, string username, string folder, string branch, Dictionary<string, Func<bool>> commitMessageFileOperations) {
 
             
 
@@ -76,11 +79,14 @@ namespace mdm_gen
                 foreach (var actionMessage in commitMessageFileOperations)
                 {
                     var commit = actionMessage.Key;
-                    actionMessage.Value.Invoke();
-                    Commands.Stage(repo, "*");
 
-                    // corregir, falla cuando no hay cambios, igual funciona por ahora.
-                    repo.Commit(commit, new Signature(username, email, DateTimeOffset.Now), new Signature(username, email, DateTimeOffset.Now));
+                    if (actionMessage.Value.Invoke())
+                    {
+                        Commands.Stage(repo, "*");
+
+                        // corregir, falla cuando no hay cambios, igual funciona por ahora.
+                        repo.Commit(commit, new Signature(username, email, DateTimeOffset.Now), new Signature(username, email, DateTimeOffset.Now)); 
+                    }
 
                 }
                 Colorful.Console.WriteLine($"Commit con archivos generados", Color.OrangeRed);
@@ -103,13 +109,9 @@ namespace mdm_gen
             var srcFolder = Path.Combine(folder, "src");
 
 
-            StageCommitPush(gitAddress, email, username, folder, "develop", new Dictionary<string, Action> { 
-                { "Eliminando archivos generados anteriormente", () => {
-                    RecursiveDelete(new DirectoryInfo(srcFolder));
-                } },
-                { "Generando modelo", () => {
-                    GenerateTsModel(srcFolder);
-                } }
+            StageCommitPush(gitAddress, email, username, folder, "master", new Dictionary<string, Func<bool>> { 
+                { "Eliminando archivos generados anteriormente", ()=>RecursiveDelete(new DirectoryInfo(srcFolder)) },
+                { "Generando modelo", () => GenerateTsModel(srcFolder) }
 
             });
 
@@ -125,22 +127,31 @@ namespace mdm_gen
 
         
 
-        private static void GenerateTsModel(string directory) {
-            var options = new GeneratorOptions
+        private static bool GenerateTsModel(string directory) {
+            try
             {
-                BaseOutputDirectory = directory,
-                CreateIndexFile = true,
-                PropertyNameConverters = new MemberNameConverterCollection(new IMemberNameConverter[] { new JsonMemberNameConverter(), new PascalCaseToCamelCaseConverter() }),
-                FileNameConverters = new TypeNameConverterCollection(new ITypeNameConverter[] {  } ),
-                SingleQuotes = true
-            };
+                var options = new GeneratorOptions
+                {
+                    BaseOutputDirectory = directory,
+                    CreateIndexFile = true,
+                    PropertyNameConverters = new MemberNameConverterCollection(new IMemberNameConverter[] { new JsonMemberNameConverter(), new PascalCaseToCamelCaseConverter() }),
+                    FileNameConverters = new TypeNameConverterCollection(new ITypeNameConverter[] { }),
+                    SingleQuotes = true
+                };
 
-            var gen = new Generator(options);
+                var gen = new Generator(options);
 
-            gen.FileContentGenerated += Gen_FileContentGenerated;
+                gen.FileContentGenerated += Gen_FileContentGenerated;
 
 
-            gen.Generate(new List<GenerationSpec>() { new ModelSpec() });
+                gen.Generate(new List<GenerationSpec>() { new ModelSpec() });
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+                
+            }
             
         }
 
@@ -320,9 +331,10 @@ namespace mdm_gen
 
 
 
-            StageCommitPush(gitRepo, email, user, folder, "develop", new Dictionary<string, Action> { { "datos cargados", () => {
+            StageCommitPush(gitRepo, email, user, folder, "develop", new Dictionary<string, Func<bool>> { { "datos cargados", () => {
                
                  File.WriteAllText(file, $"import {{ ModelMetaData }} from \"@fenix/mdm\"; \nexport const data:ModelMetaData = {json} as ModelMetaData");
+                 return true;
             } } });
 
 
@@ -436,10 +448,21 @@ namespace mdm_gen
             AddInterface<PropertyMetadata>("data/");
             AddInterface<ModelMetaData>("data/");
             AddInterface<EntityMetadata>("data/");
-            AddInterface<EntityBaseSearch<GeoPointTs>>("model/main");
-            AddInterface<GeoPointTs>("model/main").CustomBase("");
+            AddInterface(typeof(EntityBaseSearch<>), "model/main")
+                .Member(nameof(EntityBaseSearch<Object>.bl)).Type("BoolProperty", "./BoolProperty")
+                .Member(nameof(EntityBaseSearch<Object>.dbl)).Type("DblProperty", "./DblProperty")
+                .Member(nameof(EntityBaseSearch<Object>.geo)).Type("GeographyProperty", "./GeographyProperty")
+                .Member(nameof(EntityBaseSearch<Object>.enm)).Type("EnumProperty", "./EnumProperty")
+                .Member(nameof(EntityBaseSearch<Object>.dt)).Type("DtProperty", "./DtProperty")
+                .Member(nameof(EntityBaseSearch<Object>.num32)).Type("Num32Property", "./Num32Property")
+                .Member(nameof(EntityBaseSearch<Object>.num64)).Type("Num64Property", "./Num64Property")
+                .Member(nameof(EntityBaseSearch<Object>.rel)).Type("RelatedId", "./RelatedId")
+                .Member(nameof(EntityBaseSearch<Object>.str)).Type("StrProperty", "./StrProperty")
+                .Member(nameof(EntityBaseSearch<Object>.sug)).Type("StrProperty", "./StrProperty")
+                ;
+            AddInterface<GeoPointTs>("model/main");
             AddInterface(typeof(IProperty<>), "model/main");
-            AddInterface<GeographyProperty>("model/main").CustomBase("");
+            AddInterface<GeographyProperty>("model/main");
             AddInterface<DblProperty>("model/main");
             AddInterface<DtProperty>("model/main");
             AddInterface<EnumProperty>("model/main");
@@ -478,10 +501,11 @@ namespace mdm_gen
             AddInterface<Facet>("model/containers");
 
 
-            AddInterface(typeof(CollectionResult), "model/containers").Member(nameof(CollectionResult.Entities))
+            AddInterface(typeof(CollectionResult), "model/containers").Member(nameof(CollectionResult.Entities)).Type("EntityBaseSearch<GeoPointTs>", "./../main/EntityBaseSearch")
                 .Member(nameof(CollectionResult.IndexPropNames)).Optional()
                 .Member(nameof(CollectionResult.Filter)).Optional()
-                .Member(nameof(CollectionResult.Facets)).Optional();
+                .Member(nameof(CollectionResult.Facets)).Optional()
+                .Member(nameof(CollectionResult.OnlyForTsGeneticEntity)).Type("GeoPointTs", "./../main/GeoPointTs");
 
         }
 

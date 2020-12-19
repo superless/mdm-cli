@@ -135,9 +135,9 @@ namespace mdm_gen
             //FIGlet es una aplicación informática que genera banners de texto, en varias tipografías, formadas por letras compuestas por conglomerados de caracteres ASCII más pequeños.
 
 
-            var fontTitle = new Figlet(Colorful.FigletFont.Load("figlet/small"));            
+            var fontTitle = new Figlet(Colorful.FigletFont.Load("./figlet/small"));            
             
-            var mdmFiglet = new Figlet(Colorful.FigletFont.Load("figlet/small"));
+            var mdmFiglet = new Figlet(Colorful.FigletFont.Load("./figlet/small"));
 
 
             // trifenix con figlet :)

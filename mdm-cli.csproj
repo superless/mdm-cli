@@ -66,8 +66,8 @@
 
   
   <ItemGroup>
-    <None include="figlet\small" Pack="true" PackagePath="figlet" />
-    <None include="figlet\smisome1" Pack="true" PackagePath="figlet" />
+    <None Include="figlet\small" Pack="true" PackagePath="figlet" />
+    <None Include="figlet\smisome1" Pack="true" PackagePath="figlet" />
       
     <None Include="images\logo.png" Pack="true" PackagePath="" />
   </ItemGroup>

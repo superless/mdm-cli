@@ -66,10 +66,10 @@
 
   
   <ItemGroup>
-    <None Update="figlet\small" Pack="true" >
+    <None Update=".\figlet\small" Pack="true" >
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="figlet\smisome1" Pack="true">
+    <None Update=".\figlet\smisome1" Pack="true">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="images\logo.png" Pack="true" PackagePath="" />

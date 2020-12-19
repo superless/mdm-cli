@@ -26,13 +26,14 @@
     <copyright>MIT Open Source</copyright>
     <IsPackable>true</IsPackable>
     <tags>lowcode search devops</tags>
-    <PackageType>Dependency</PackageType>
+    <PackageType>DotnetTool</PackageType>
     <summary>Creación del modelo desde .net a typescript.</summary>
-
     <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage
     </TargetsForTfmSpecificBuildOutput>
-
     <DocumentationFile>mdm-cli.xml</DocumentationFile>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>mdm-cli</ToolCommandName>
+    
 
   </PropertyGroup>
   <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="BuildOnlySettings;ResolveReferences">

@@ -37,6 +37,7 @@ namespace mdm_gen
             if (!baseDir.Exists)
                 return false;
 
+            
             foreach (var dir in baseDir.EnumerateDirectories())
             {
                 RecursiveDelete(dir);

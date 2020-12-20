@@ -59,7 +59,6 @@
     <PackageReference Include="CommandLineParser" Version="2.8.0" />
     <PackageReference Include="Cosmonaut" Version="2.11.3" />
     <PackageReference Include="LibGit2Sharp" Version="0.26.2" />
-    <PackageReference Include="trifenix.connect.mdm" Version="0.8.48" />
     <PackageReference Include="TypeGen" Version="2.4.9" />
     <PackageReference Include="trifenix.connect" Version="0.8.56" />
   </ItemGroup>

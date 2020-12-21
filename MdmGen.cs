@@ -270,7 +270,7 @@ namespace mdm_gen
 
 
 
-        public static void GenerateDataMdm(string assembly, string modelNamespace, string inputNamespace, string documentNamespace, string gitRepo, string user, string email)
+        public static void GenerateDataMdm(string assembly, string modelNamespace, string inputNamespace, string documentNamespace, string gitRepo, string user, string email, string branch)
         {
             var assemblyInput = Assembly.LoadFrom(assembly);
 
@@ -332,7 +332,7 @@ namespace mdm_gen
 
 
 
-            StageCommitPush(gitRepo, email, user, folder, "develop", new Dictionary<string, Func<bool>> { { "datos cargados", () => {
+            StageCommitPush(gitRepo, email, user, folder, branch, new Dictionary<string, Func<bool>> { { "datos cargados", () => {
                
                  File.WriteAllText(file, $"import {{ ModelMetaData }} from \"@fenix/mdm\"; \nexport const data:ModelMetaData = {json} as ModelMetaData");
                  return true;

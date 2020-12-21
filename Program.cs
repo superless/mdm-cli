@@ -26,13 +26,7 @@ namespace mdm_gen
         /// <summary>
         /// Determina el tipo de rama a la que accederá.
         /// </summary>
-        public enum BranchType { 
-            production,
-            release,
-            hotfix,
-            develop
-        }
-        
+      
 
         /// <summary>
         /// El verbo determina el primer argumento después del nombre del progrmama, en este caso
@@ -97,6 +91,12 @@ namespace mdm_gen
 
             [Option('e', "email", Required = true, HelpText = "correo que registra el cambio en el repositorio del componente")]
             public string email { get; set; }
+
+            /// <summary>
+            /// Rama que será sobrescrita en el github
+            /// </summary>
+            [Option('b', "branch", Required = true, HelpText = "rama que sobrescribirá en el código typescript")]
+            public string branch  { get; set; }
 
 
 
@@ -165,7 +165,7 @@ namespace mdm_gen
             else if (ts.GenKind == GenKind.data) {
 
                 Colorful.Console.WriteLine("Generación datos del modelo", Color.DarkGreen);
-                CreateDataModel(ts.Assembly, ts.modelNamespace, ts.inputNamespace, ts.docsNamespace, ts.GitAddress, ts.username, ts.email);
+                CreateDataModel(ts.Assembly, ts.modelNamespace, ts.inputNamespace, ts.docsNamespace, ts.GitAddress, ts.username, ts.email, ts.branch);
 
                 
             }
@@ -180,8 +180,8 @@ namespace mdm_gen
             MdmGen.GenerateMdm(gitAddress, email, username);
         }
 
-        public static void CreateDataModel(string assembly, string modelNamespace, string inputNamespace, string documentNamespace, string gitRepo, string user, string email) {
-            MdmGen.GenerateDataMdm(assembly, modelNamespace, inputNamespace, documentNamespace, gitRepo, user, email);
+        public static void CreateDataModel(string assembly, string modelNamespace, string inputNamespace, string documentNamespace, string gitRepo, string user, string email, string branch) {
+            MdmGen.GenerateDataMdm(assembly, modelNamespace, inputNamespace, documentNamespace, gitRepo, user, email, branch);
         }
 
 

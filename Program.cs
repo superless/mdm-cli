@@ -135,12 +135,9 @@ namespace mdm_gen
 
             //FIGlet es una aplicación informática que genera banners de texto, en varias tipografías, formadas por letras compuestas por conglomerados de caracteres ASCII más pequeños.
 
-            var currentDitectory = typeof(MdmGen).Assembly.CodeBase;
+            var currentDitectory = AppDomain.CurrentDomain.BaseDirectory;
 
-            var location = new Uri(currentDitectory).LocalPath;
-
-
-            var fontPath = Path.Combine(location, "figlet/small");
+            var fontPath = Path.Combine(currentDitectory, "figlet/small");
 
             Colorful.Console.WriteLine($"ruta finglets img 1: {fontPath} ");
 

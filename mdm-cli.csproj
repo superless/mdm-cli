@@ -63,8 +63,12 @@
 
   
   <ItemGroup>
-    <None Include="figlet\small" Pack="true" PackagePath="figlet" />
-    <None Include="figlet\smisome1" Pack="true" PackagePath="figlet" />      
+    <None Include="figlet\small" Pack="true" PackagePath="figlet">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="figlet\smisome1" Pack="true" PackagePath="figlet">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>      
     <None Include="images\logo.png" Pack="true" PackagePath="" />
   </ItemGroup>
 

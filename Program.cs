@@ -3,6 +3,7 @@ using CommandLine;
 using System;
 using System.Drawing;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Security.Authentication.ExtendedProtection;
 using System.Threading;
@@ -134,17 +135,19 @@ namespace mdm_gen
 
             //FIGlet es una aplicación informática que genera banners de texto, en varias tipografías, formadas por letras compuestas por conglomerados de caracteres ASCII más pequeños.
 
+            var currentDitectory = AppDomain.CurrentDomain.BaseDirectory;
 
-            var fontTitle = new Figlet(Colorful.FigletFont.Load("./figlet/small"));            
-            
-            var mdmFiglet = new Figlet(Colorful.FigletFont.Load("./figlet/small"));
+            var fontPath = Path.Combine(currentDitectory, "figlet/small");
 
+            Colorful.Console.WriteLine($"ruta finglets img 1: {fontPath} ");
+
+            var fontTitle = new Figlet(Colorful.FigletFont.Load(fontPath));            
 
             // trifenix con figlet :)
             Colorful.Console.WriteLine(fontTitle.ToAscii("Trifenix Connect"), Color.Red);
 
             // metadata model
-            Colorful.Console.WriteLine(mdmFiglet.ToAscii("MDM"), Color.Purple);
+            Colorful.Console.WriteLine(fontTitle.ToAscii("MDM"), Color.Purple);
 
             // generación de código para trifenix connect.
             Colorful.Console.WriteLine("Bienvenido a la generación de código de trifenix connect mdm", Color.BlueViolet);

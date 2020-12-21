@@ -17,7 +17,7 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <title>mdm-cli</title>
     <authors>Trifenix</authors>
-    <owners>trifenix</owners>
+    <owners>Trifenix</owners>
     <projectUrl>https://connect.trifenix.io/nuget-packages/trifenix-mdm</projectUrl>
     <iconUrl>https://logos.trifenix.io/logo.48x48.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
@@ -33,8 +33,6 @@
     <DocumentationFile>mdm-cli.xml</DocumentationFile>
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>mdm-cli</ToolCommandName>
-    
-
   </PropertyGroup>
   <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="BuildOnlySettings;ResolveReferences">
     <ItemGroup>
@@ -60,14 +58,13 @@
     <PackageReference Include="Cosmonaut" Version="2.11.3" />
     <PackageReference Include="LibGit2Sharp" Version="0.26.2" />
     <PackageReference Include="TypeGen" Version="2.4.9" />
-    <PackageReference Include="trifenix.connect" Version="0.8.56" />
+    <PackageReference Include="trifenix.connect" Version="0.8.58" />
   </ItemGroup>
 
   
   <ItemGroup>
     <None Include="figlet\small" Pack="true" PackagePath="figlet" />
-    <None Include="figlet\smisome1" Pack="true" PackagePath="figlet" />
-      
+    <None Include="figlet\smisome1" Pack="true" PackagePath="figlet" />      
     <None Include="images\logo.png" Pack="true" PackagePath="" />
   </ItemGroup>
 

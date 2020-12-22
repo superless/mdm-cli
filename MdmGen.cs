@@ -451,8 +451,7 @@ namespace mdm_gen
             AddInterface<EntityMetadata>("data/");
             AddInterface(typeof(EntityBaseSearch<>), "model/main")
                 .Member(nameof(EntityBaseSearch<Object>.bl)).Type("BoolProperty", "./BoolProperty")
-                .Member(nameof(EntityBaseSearch<Object>.dbl)).Type("DblProperty", "./DblProperty")
-                .Member(nameof(EntityBaseSearch<Object>.geo)).Type("GeographyProperty", "./GeographyProperty")
+                .Member(nameof(EntityBaseSearch<Object>.dbl)).Type("DblProperty", "./DblProperty")                
                 .Member(nameof(EntityBaseSearch<Object>.enm)).Type("EnumProperty", "./EnumProperty")
                 .Member(nameof(EntityBaseSearch<Object>.dt)).Type("DtProperty", "./DtProperty")
                 .Member(nameof(EntityBaseSearch<Object>.num32)).Type("Num32Property", "./Num32Property")

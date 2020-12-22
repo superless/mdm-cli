@@ -2,7 +2,7 @@
   "profiles": {
     "mdm-gen": {
       "commandName": "Project",
-      "commandLineArgs": "typescript https://alejandro.iglesias:72d70db3cd18cf0edd8f41eb242b82fdc66874e9@github.com/trifenix/mdm-auto-npm.git typescript -t model -u alejandro.iglesias -e alejandro.iglesias@trifenix.io"
+      "commandLineArgs": "typescript https://alejandro.iglesias:79417cf4848fd760603dc1d4e67ff6ede8202c68@github.com/trifenix/mdm-auto-npm.git typescript -t model -u alejandro.iglesias -e alejandro.iglesias@trifenix.io -b master"
     }
   }
 }

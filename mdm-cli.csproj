@@ -60,6 +60,7 @@
     <PackageReference Include="TypeGen" Version="2.4.9" />
     <PackageReference Include="trifenix.connect" Version="0.8.59" />
   </ItemGroup>
+  
 
   
   <ItemGroup>

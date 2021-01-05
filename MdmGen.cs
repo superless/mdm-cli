@@ -72,6 +72,35 @@ namespace mdm_gen
 
                 Colorful.Console.WriteLine($"Repositorio clonado", Color.OrangeRed);
 
+                var listTags = repo.Tags;
+
+                var fullTags = listTags.Select(s => {
+                    var splt = s.FriendlyName.Split(".", 3);
+
+                    return new
+                    {
+                        major = splt[0],
+                        minor = splt[1],
+                        patch = splt[2],
+                        full = s.FriendlyName
+
+                    };
+                }).Where(s => int.TryParse(s.major, out var res) && int.TryParse(s.minor, out var res2) && int.TryParse(s.patch, out var res3));
+
+
+                var maxMajor = fullTags.Max(s => s.major);
+                var maxMinor = fullTags.Max(s => s.minor);
+                var maxPatch = fullTags.Max(s => s.patch);
+
+                var newTag = $"{maxMajor}.{maxMinor}.{int.Parse(maxPatch) + 1}";
+
+                var tg = repo.ApplyTag(newTag);
+
+                Colorful.Console.WriteLine($"Generando nuevo tag : {newTag}", Color.OrangeRed);
+
+
+                repo.Network.Push(repo.Network.Remotes["origin"], tg.CanonicalName, new PushOptions { });
+
                 var srcFolder = Path.Combine(folder, "src");
 
                 Colorful.Console.WriteLine($"Eliminando archivos generados anteriormente", Color.OrangeRed);
@@ -90,6 +119,7 @@ namespace mdm_gen
                     }
 
                 }
+
                 Colorful.Console.WriteLine($"Commit con archivos generados", Color.OrangeRed);
 
                 repo.Network.Push(repo.Network.Remotes["origin"], @$"refs/heads/{branch}", new PushOptions { });

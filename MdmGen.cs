@@ -112,7 +112,7 @@ namespace mdm_gen
 
             StageCommitPush(gitAddress, email, username, folder, "master", new Dictionary<string, Func<bool>> { 
                 { "Eliminando archivos generados anteriormente", ()=>RecursiveDelete(new DirectoryInfo(srcFolder)) },
-                { "Generando modelo", () => GenerateTsModel(srcFolder) }
+                { "+semver: fix : Generando modelo", () => GenerateTsModel(srcFolder) }
 
             });
 

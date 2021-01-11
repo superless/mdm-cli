@@ -88,7 +88,7 @@ namespace mdm_gen
                 var listTags = repo.Tags;
 
                 // filtra tags, con un formato legible de SemVer.
-                var fullTags = listTags.Where(s=> s.FriendlyName.Split(".").Count() >3).Select(s => {
+                var fullTags = listTags.Where(s=> s.FriendlyName.Split(".").Count() >=3).Select(s => {
                     var splt = s.FriendlyName.Split(".", 3);
 
                     return new

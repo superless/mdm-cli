@@ -1,5 +1,4 @@
 ﻿using LibGit2Sharp;
-using Microsoft.Azure.Documents;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System;
@@ -9,22 +8,22 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using trifenix.connect.mdm.entity_model;
 using trifenix.connect.mdm.enums;
 using trifenix.connect.mdm.resources;
 using trifenix.connect.mdm.ts_model;
-using trifenix.connect.mdm.ts_model.props;
 using trifenix.connect.mdm_attributes;
-using trifenix.connect.ts_model.enums;
 using trifenix.connect.util;
 using TypeGen.Core.Converters;
-using TypeGen.Core.Extensions;
 using TypeGen.Core.Generator;
 using TypeGen.Core.SpecGeneration;
 
 
 namespace mdm_gen
 {
+
+    /// <summary>
+    /// Programa de línea de comandos 
+    /// </summary>
     public static class MdmGen
     {
 
@@ -338,7 +337,8 @@ namespace mdm_gen
             };
 
 
-
+            // los siguientes tipos existen en un entitySearch
+            // pero para este caso serán agrupados de manera más general.
 
             var suggestions = GetDictionaryFromRelated(propertySearchInfo, false, (int)KindProperty.SUGGESTION);
 
@@ -349,8 +349,6 @@ namespace mdm_gen
             var num64NotInNum = num64.Where(sg => !modelDictionary.NumData.Any(s => s.Key == sg.Key));
 
             var relLocal = GetDictionaryFromRelated(propertySearchInfo, true, (int)KindEntityProperty.LOCAL_REFERENCE);
-
-
 
             if (suggestionNotInString.Any())
                 foreach (var item in suggestionNotInString)
@@ -364,18 +362,35 @@ namespace mdm_gen
                 foreach (var item in relLocal)
                     modelDictionary.relData.Add(item.Key, item.Value);
 
+
+
             return modelDictionary;
+
+
         }
 
+
+        /// <summary>
+        /// Obtiene un diccionario con la metadata de propiedades
+        /// de acuerdo al tipo y al indice.
+        /// </summary>
+        /// <param name="propSearchInfos">colección de propiedades asociadas a un índice</param>
+        /// <param name="isEntity">El resultado a obtener son entidades?</param>
+        /// <param name="related">tipo de dato a buscar (str, sug, num32, etc) o entidad (local/ referencia)</param>
+        /// <returns></returns>
         private static Dictionary<int, PropertyMetadata> GetDictionaryFromRelated(IEnumerable<PropertySearchInfo> propSearchInfos, bool isEntity, int related)
         {
+
+            // dependiendo, si la solicitud es entidad o valor, si es entidad buscará todas las entidades del elemento. 
+            // si es valor (num32, str, etc), usará el related para determinar que propiedades traerá.
             var infos = isEntity?propSearchInfos.Where(s=>s.IsEntity && s.RelatedEntity== (KindEntityProperty)related):propSearchInfos.Where(s => !s.IsEntity && s.Related == (KindProperty)related).ToList();
+
 
             return infos.ToDictionary(s => s.Index, g => new PropertyMetadata
             {
                 Visible = g.Visible,
                 AutoNumeric = g.AutoNumeric,
-                NameProp = char.ToLower(g.Name[0]) + g.Name.Substring(1),
+                NameProp = char.ToLower(g.Name[0]) + g.Name.Substring(1), // First Upper Case.
                 isArray = g.IsEnumerable,
                 Info = g.Info,
                 Required = g.IsRequired,
@@ -384,6 +399,12 @@ namespace mdm_gen
             });
         }
 
+
+        /// <summary>
+        /// Obtiene la metadata de propiedad de tipo enuneración
+        /// </summary>
+        /// <param name="propSearchInfos">Colección de metadata, donde se buscará la enumeración</param>
+        /// <returns>metadata de las enumeraciones de un elemento.</returns>
         private static Dictionary<int, PropertyMetadadataEnum> GetEnumDictionaryFromRelated(IEnumerable<PropertySearchInfo> propSearchInfos)
         {
             return propSearchInfos.Where(s => s.Related == KindProperty.ENUM).ToDictionary(s => s.Index, g => new PropertyMetadadataEnum
@@ -398,24 +419,44 @@ namespace mdm_gen
 
 
 
+        /// <summary>
+        /// Genera modelo de datos desde una dll de un proyecto
+        /// que implemente trifenix connect.
+        /// </summary>
+        /// <param name="assembly">dll de donde obtendrá los valores</param>
+        /// <param name="modelNamespace">namespace donde se encuentra el modelo</param>
+        /// <param name="inputNamespace">namespace donde se encuentra el input-model</param>
+        /// <param name="documentNamespace">namespace donde se encuentra la implementación de IMDMDocumentation</param>
+        /// <param name="gitRepo">repositorio donde se subirá la información</param>
+        /// <param name="user">nombre de usuario git</param>
+        /// <param name="email">correo git</param>
+        /// <param name="branch">rama</param>
         public static void GenerateDataMdm(string assembly, string modelNamespace, string inputNamespace, string documentNamespace, string gitRepo, string user, string email, string branch)
         {
+
+            // assembly
             var assemblyInput = Assembly.LoadFrom(assembly);
 
 
+            // modelo
             var modelTypes = GetTypesFromNameSpace(assemblyInput, modelNamespace);
 
 
+            // documentación
             var documentation = GetDocumentation(assemblyInput, documentNamespace);
 
 
+            // metadata de los tipos
             var propSearchinfos = modelTypes.Where(s => s.GetTypeInfo().GetCustomAttributes<EntityIndexAttribute>(true).Any()).Select(s => {
 
+                // metadata de la entidad
                 var infoHeader = s.GetTypeInfo().GetCustomAttributes<EntityIndexAttribute>(true).FirstOrDefault();
 
+                // busca si existen metadatas de menú.
                 var grp = s.GetCustomAttributes(typeof(EntityGroupMenuAttribute), true).Select(s => (EntityGroupMenuAttribute)s).ToList();
 
 
+                // objeto anónimo con metadata.
                 return new
                 {
                     index = infoHeader.Index,
@@ -430,6 +471,8 @@ namespace mdm_gen
 
             }).ToList();
 
+
+            // metadata en colección de EntityMetadata
             var modelDict = propSearchinfos.Select(s =>
             {
                 var model = GetModel(s.propInfos, documentation,  s.index);
@@ -446,20 +489,28 @@ namespace mdm_gen
             // mdm agro
             var modelDate = new ModelMetaData { Indexes = modelDict.ToArray() };
 
+            // serialización de datos
             var json = JsonConvert.SerializeObject(modelDate, new JsonSerializerSettings
             {
                 ContractResolver = new CamelCasePropertyNamesContractResolver()
             });
 
 
+
+            // carpeta temporal, donde se creará el modelo
             var folder = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), $"mdm-data-{Guid.NewGuid()}")).FullName;
 
+
+            // carpeta código fuente.
             var srcFolder = Path.Combine(folder, "src");
+
+
+            // archivo a generar.
             var file =  Path.Combine(srcFolder, "index.ts");
 
 
 
-
+            // commit y envío.
             StageCommitPush(gitRepo, email, user, folder, branch, new Dictionary<string, Func<bool>> { { "datos cargados", () => {
                
                  File.WriteAllText(file, $"import {{ ModelMetaData }} from \"@fenix/mdm\"; \nexport const data:ModelMetaData = {json} as ModelMetaData");
@@ -475,26 +526,37 @@ namespace mdm_gen
 
         }
 
+
+        /// <summary>
+        /// Obtiene una colección de metadata desde una entidad.
+        /// </summary>
+        /// <param name="type">Clase de tipo modelo, donde debe obtener la metadata</param>
+        /// <param name="index">índice de la entidad</param>
+        /// <param name="inputType">Clase de tipo input, donde podrá obtener la metadata</param>
+        /// <param name="docs">Implmentación de IMdmDocumentation para generar la documentación</param>
+        /// <returns>Colección de metadata</returns>
         public static PropertySearchInfo[] GetPropertyByIndex(Type type, int index, Type inputType, IMdmDocumentation docs)
         {
+
+            // obtiene el atributo de la clase, que determina el índice de la entidad
             var searchAttributesProps = type.GetProperties().Where(prop => Attribute.IsDefined(prop, typeof(BaseIndexAttribute), true));
 
             
-
+            
+            // asigna la metadata de la propiedad, además, si es requerido o si es único. 
             var elemTypeInputProps = inputType.GetProperties().Where(prop => Attribute.IsDefined(prop, typeof(BaseIndexAttribute), true))
                 .Select(s => new { info = s, search = Mdm.Reflection.Attributes.GetAttribute<BaseIndexAttribute>(s), required = Mdm.Reflection.Attributes.GetAttribute<RequiredAttribute>(s), unique = Mdm.Reflection.Attributes.GetAttribute<UniqueAttribute>(s) });
 
             
 
+
+            // crea un listado de metadata para la entidad.
             var props = searchAttributesProps.Select(s => {
 
                 // buscando atributos. 
                 var searchAttribute = (BaseIndexAttribute)s.GetCustomAttributes(typeof(BaseIndexAttribute), true).FirstOrDefault();
                 var searchAttributeInput = elemTypeInputProps.FirstOrDefault(p => p.search.Index == searchAttribute.Index && p.search.IsEntity == searchAttribute.IsEntity);
                 var grp = s.GetCustomAttributes(typeof(GroupAttribute), true).Select(s=>(GroupAttribute)s).ToList();
-
-
-
 
                 return new PropertySearchInfo
                 {
@@ -549,6 +611,15 @@ namespace mdm_gen
             return props;
         }
 
+
+        /// <summary>
+        /// Obtiene metadata desde una entidad. 
+        /// </summary>
+        /// <param name="type">Tipo de entidad</param>
+        /// <param name="assemblyInput"></param>
+        /// <param name="typeNamespace">namespace del input (se buscará el input vinculado a la clase, a través de los índices)</param>
+        /// <param name="docs">Implmentación Documentación</param>
+        /// <returns>Colección de metadata</returns>
         public static PropertySearchInfo[] GetPropertySearchInfo(Type type, Assembly assemblyInput, string typeNamespace, IMdmDocumentation docs)
         {
             var classAtribute = Mdm.Reflection.Attributes.GetAttributes<EntityIndexAttribute>(type);
@@ -561,128 +632,6 @@ namespace mdm_gen
 
 
             return GetPropertyByIndex(type, classAtribute.FirstOrDefault().Index, inputType, docs);
-        }
-    }
-
-    
-
-
-    public class ModelSpec : GenerationSpec {
-
-        public override void OnBeforeGeneration(OnBeforeGenerationArgs args)
-        {
-            
-            AddInterface<PropertyMetadadataEnum>("data/");
-            AddInterface<EntitySearchDisplayInfo>("data/");
-            AddInterface<PropertyMetadata>("data/");
-            AddInterface<ModelMetaData>("data/");
-            AddInterface<EntityMetadata>("data/");
-            AddInterface(typeof(EntityBaseSearch<>), "model/main")
-                .Member(nameof(EntityBaseSearch<Object>.bl)).Type("BoolProperty", "./BoolProperty")
-                .Member(nameof(EntityBaseSearch<Object>.dbl)).Type("DblProperty", "./DblProperty")                
-                .Member(nameof(EntityBaseSearch<Object>.enm)).Type("EnumProperty", "./EnumProperty")
-                .Member(nameof(EntityBaseSearch<Object>.dt)).Type("DtProperty", "./DtProperty")
-                .Member(nameof(EntityBaseSearch<Object>.num32)).Type("Num32Property", "./Num32Property")
-                .Member(nameof(EntityBaseSearch<Object>.num64)).Type("Num64Property", "./Num64Property")
-                .Member(nameof(EntityBaseSearch<Object>.rel)).Type("RelatedId", "./RelatedId")
-                .Member(nameof(EntityBaseSearch<Object>.str)).Type("StrProperty", "./StrProperty")
-                .Member(nameof(EntityBaseSearch<Object>.sug)).Type("StrProperty", "./StrProperty")
-                ;
-            AddInterface<GeoPointTs>("model/main");
-            AddInterface(typeof(IProperty<>), "model/main");
-            AddInterface<GeographyProperty>("model/main");
-            AddInterface<DblProperty>("model/main");
-            AddInterface<DtProperty>("model/main");
-            AddInterface<EnumProperty>("model/main");
-            AddInterface<StrProperty>("model/main");
-            AddInterface<Num32Property>("model/main");
-            AddInterface<Num64Property>("model/main");
-            AddInterface<BoolProperty>("model/main");
-            AddInterface(typeof(PropertyBaseFaceTable<>),"model/main");
-            AddInterface<IPropertyFaceTable>("model/main");
-            AddInterface<RelatedId>("model/main");
-            AddInterface<StrProperty>("model/main");
-            AddEnum<PhisicalDevice>("model/enums");
-            AddEnum<FilterType>("model/enums");
-            AddInterface<FilterGlobalEntityInput>("model/filters").Member(nameof(FilterGlobalEntityInput.FilterChilds)).Optional();
-            AddInterface<GroupInput>("model/containers")
-                .Member(nameof(GroupInput.ColumnProportion)).Optional()                
-                .Member(nameof(GroupInput.OrderIndex)).Optional()
-                .Member(nameof(GroupInput.Device)).Optional();
-            AddInterface<GroupMenu>("model/containers");
-            AddInterface<FilterModel>("model/filters")
-                .Member(nameof(FilterModel.BoolFilters)).Optional()
-                .Member(nameof(FilterModel.DateFilters)).Optional()
-                .Member(nameof(FilterModel.DoubleFilters)).Optional()
-                .Member(nameof(FilterModel.EnumFilter)).Optional()
-                .Member(nameof(FilterModel.FilterEntity)).Optional()
-                .Member(nameof(FilterModel.FilterStr)).Optional()
-                .Member(nameof(FilterModel.LongFilter)).Optional()
-                .Member(nameof(FilterModel.NumFilter)).Optional();
-
-
-            AddInterface(typeof(FilterBase<>), "model/filters");
-
-            AddInterface<OrderItem>("model/containers");
-
-
-            AddInterface<Facet>("model/containers");
-
-
-            AddInterface(typeof(CollectionResult), "model/containers").Member(nameof(CollectionResult.Entities)).Type("EntityBaseSearch<GeoPointTs>", "./../main/EntityBaseSearch")
-                .Member(nameof(CollectionResult.IndexPropNames)).Optional()
-                .Member(nameof(CollectionResult.Filter)).Optional()
-                .Member(nameof(CollectionResult.Facets)).Optional()
-                .Member(nameof(CollectionResult.OnlyForTsGeneticEntity)).Type("GeoPointTs", "./../main/GeoPointTs");
-
-        }
-
-        public override void OnBeforeBarrelGeneration(OnBeforeBarrelGenerationArgs args)
-        {
-            AddBarrel("model/main", BarrelScope.Files);
-            AddBarrel("model/enums", BarrelScope.Files);
-            AddBarrel("model/filters", BarrelScope.Files | BarrelScope.Directories);
-            AddBarrel("model/containers", BarrelScope.Files | BarrelScope.Directories);
-            AddBarrel("data", BarrelScope.Files | BarrelScope.Directories);
-            AddBarrel("model", BarrelScope.Directories);
-            AddBarrel(".", BarrelScope.Directories);
-
-        }
-    }
-
-    
-
-    /// <summary>
-    /// toma el nombre que se asignó en un atributo jsonProperty y se lo asigna, si existe. de lo contrario
-    /// tomará el nombre de la propiedad.
-    /// </summary>
-    public class JsonMemberNameConverter : IMemberNameConverter
-    {
-        //TypeNameConverterCollection
-        public string Convert(string name, MemberInfo memberInfo)
-        {
-            var attribute = memberInfo.GetCustomAttribute<JsonPropertyAttribute>();
-            
-            var jsonname = attribute != null ? attribute.PropertyName : name;
-
-            if (memberInfo.GetType().IsInterface)
-            {
-                return jsonname.Substring(1);
-            }
-
-            return jsonname;
-        }
-    }
-
-    public class TypeMemberConverter : ITypeNameConverter
-    {
-        public string Convert(string name, Type type)
-        {
-            if (type.IsInterface)
-            {
-                return name.Substring(1);
-            }
-            return name;
         }
     }
 

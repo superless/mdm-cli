@@ -1,0 +1,254 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>mdm-cli</name>
+    </assembly>
+    <members>
+        <member name="M:mdm_gen.MdmGen.RecursiveDelete(System.IO.DirectoryInfo)">
+            <summary>
+            Borra recursivamente una carpeta
+            </summary>
+            <param name="baseDir">carpeta a borrar</param>
+        </member>
+        <member name="M:mdm_gen.MdmGen.StageCommitPush(System.String,System.String,System.String,System.String,System.String,System.Collections.Generic.Dictionary{System.String,System.Func{System.Boolean}})">
+            <summary>
+            Realiza commits determinados por commitMessageFIleOperations
+            genera un nuevo tag de acuerdo a la última versión.
+            envía al git determinado por los argumentos
+            </summary>
+            <param name="gitAddress">dirección del git (debería incluir el token)</param>
+            <param name="email">correo electrónico</param>
+            <param name="username">alejandro</param>
+            <param name="folder">carpeta donde se clonará el proyecto</param>
+            <param name="branch">rama donde se operará</param>
+            <param name="commitMessageFileOperations">Funciones por commit, por cada commit se ejecutará la función.</param>
+        </member>
+        <member name="M:mdm_gen.MdmGen.GenerateMdm(System.String,System.String,System.String,System.String)">
+            <summary>
+            Genera las clases en typescript desde el repositorio que se le asigne
+            para luego actualizar la rama develop del componente
+            </summary>
+            <param name="gitAddress">repositorio git donde se actualizará</param>
+            <param name="email">correo del usuario git</param>
+            <param name="username">correo del usuario</param>
+            <param name="branch">correo del usuario</param>
+        </member>
+        <member name="M:mdm_gen.MdmGen.GenerateTsModel(System.String)">
+            <summary>
+            Genera modelo typescript de acuerdo a un generator spec
+            </summary>
+            <param name="directory">carpeta donde generará el modelo</param>
+            <returns></returns>
+        </member>
+        <member name="M:mdm_gen.MdmGen.GetLoadableTypes(System.Reflection.Assembly)">
+            <summary>
+            Obtiene los tipos de un assembly (dll).
+            </summary>
+            <param name="assembly">dll obtenido desde una ruta</param>
+            <returns></returns>
+        </member>
+        <member name="M:mdm_gen.MdmGen.GetTypesFromNameSpace(System.Reflection.Assembly,System.String)">
+            <summary>
+            Obtiene los tipos de un namespace en partícular
+            </summary>
+            <param name="assmbl">assembly a analizar</param>
+            <param name="ns">namespace a buscar</param>
+            <returns></returns>
+        </member>
+        <member name="M:mdm_gen.MdmGen.Gen_FileContentGenerated(System.Object,TypeGen.Core.Generator.FileContentGeneratedArgs)">
+            <summary>
+            Muestra pantalla por cada evento de generación de archivo
+            </summary>
+            <param name="sender"></param>
+            <param name="e">detalles del archivo generado</param>
+        </member>
+        <member name="M:mdm_gen.MdmGen.GetDocumentation(System.Reflection.Assembly,System.String)">
+            <summary>
+            Obtiene la documentación desde un assembly, que implemente IMdmdDocumentation.
+            </summary>
+            <param name="assembly">assembly donde se buscará la implementación</param>
+            <param name="ns">namespace</param>
+            <returns>elemento de documentación desde el assemby</returns>
+        </member>
+        <member name="M:mdm_gen.MdmGen.GetDocumentationType(System.Reflection.Assembly,System.String)">
+            <summary>
+            Tipo que implementa documentación.
+            </summary>
+            <param name="assembly">assembly del proyecto, donde se buscará</param>
+            <param name="ns">namespace donde buscar</param>
+            <returns>Tipo de la implementación de documentación</returns>
+        </member>
+        <member name="M:mdm_gen.MdmGen.GetModel(System.Collections.Generic.IEnumerable{trifenix.connect.mdm.ts_model.PropertySearchInfo},trifenix.connect.mdm.resources.IMdmDocumentation,System.Int32)">
+            <summary>
+            Obtiene el modelo de una implementación de trifenix connect
+            </summary>
+            <param name="propertySearchInfo">información de cada propiedad de la entidad</param>
+            <param name="doc">Implementación de la documetación</param>
+            <param name="index">índice de la entidad</param>
+            <returns></returns>
+        </member>
+        <member name="M:mdm_gen.MdmGen.GetDictionaryFromRelated(System.Collections.Generic.IEnumerable{trifenix.connect.mdm.ts_model.PropertySearchInfo},System.Boolean,System.Int32)">
+            <summary>
+            Obtiene un diccionario con la metadata de propiedades
+            de acuerdo al tipo y al indice.
+            </summary>
+            <param name="propSearchInfos">colección de propiedades asociadas a un índice</param>
+            <param name="isEntity">El resultado a obtener son entidades?</param>
+            <param name="related">tipo de dato a buscar (str, sug, num32, etc) o entidad (local/ referencia)</param>
+            <returns></returns>
+        </member>
+        <member name="M:mdm_gen.MdmGen.GetEnumDictionaryFromRelated(System.Collections.Generic.IEnumerable{trifenix.connect.mdm.ts_model.PropertySearchInfo})">
+            <summary>
+            Obtiene la metadata de propiedad de tipo enuneración
+            </summary>
+            <param name="propSearchInfos">Colección de metadata, donde se buscará la enumeración</param>
+            <returns>metadata de las enumeraciones de un elemento.</returns>
+        </member>
+        <member name="M:mdm_gen.MdmGen.GenerateDataMdm(System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String)">
+            <summary>
+            Genera modelo de datos desde una dll de un proyecto
+            que implemente trifenix connect.
+            </summary>
+            <param name="assembly">dll de donde obtendrá los valores</param>
+            <param name="modelNamespace">namespace donde se encuentra el modelo</param>
+            <param name="inputNamespace">namespace donde se encuentra el input-model</param>
+            <param name="documentNamespace">namespace donde se encuentra la implementación de IMDMDocumentation</param>
+            <param name="gitRepo">repositorio donde se subirá la información</param>
+            <param name="user">nombre de usuario git</param>
+            <param name="email">correo git</param>
+            <param name="branch">rama</param>
+        </member>
+        <member name="M:mdm_gen.MdmGen.GetPropertyByIndex(System.Type,System.Int32,System.Type,trifenix.connect.mdm.resources.IMdmDocumentation)">
+            <summary>
+            Obtiene una colección de metadata desde una entidad.
+            </summary>
+            <param name="type">Clase de tipo modelo, donde debe obtener la metadata</param>
+            <param name="index">índice de la entidad</param>
+            <param name="inputType">Clase de tipo input, donde podrá obtener la metadata</param>
+            <param name="docs">Implmentación de IMdmDocumentation para generar la documentación</param>
+            <returns>Colección de metadata</returns>
+        </member>
+        <member name="T:mdm_gen.JsonMemberNameConverter">
+            <summary>
+            toma el nombre que se asignó en un atributo jsonProperty y se lo asigna, si existe. de lo contrario
+            tomará el nombre de la propiedad.
+            </summary>
+        </member>
+        <member name="T:mdm_gen.Program">
+            <summary>
+            Programa de línea de comandos para crear paquetes npn en javascript.
+            </summary>
+        </member>
+        <member name="T:mdm_gen.Program.ModelArguments">
+            <summary>
+            Se crea el verbo model, el cual permitirá tener los argumentos necesarios para ejecutar la creación del modelo de datos de mdm
+            en typescript y poder publicarla en un github definido por los parámetros.
+            Nuevos detalles de la definición en :
+            https://dev.azure.com/trifenix-connect/agrofenix/_sprints/taskboard/agrofenix%20Team/agrofenix/pre-Sprint?workitem=62
+            </summary>
+        </member>
+        <member name="P:mdm_gen.Program.ModelArguments.username">
+            <summary>
+            Usuario que registra el cambio en el repositorio del componente
+            </summary>
+        </member>
+        <member name="P:mdm_gen.Program.ModelArguments.email">
+            <summary>
+            correo que registra el cambio en el repositorio del componente
+            </summary>
+        </member>
+        <member name="P:mdm_gen.Program.ModelArguments.branch">
+            <summary>
+            Rama que será sobrescrita en el github
+            </summary>
+        </member>
+        <member name="T:mdm_gen.Program.DataModelArguments">
+            <summary>
+            Verbo para generar el modelo de datos de trifenix connect.
+            Este comando genera la metadata de yb proyecto que implemente el modelo de trifenix, entre elloas:
+            Con esta metadata el cliente tendrá todos los datos necesarios para operar
+            La estructura está formada desde los siguientes namespaces, necesarios como parámetros.
+            1. Index-model, el index model es el diccionario que vincula los EntitySearch con las clases del modelo y el input.
+            2. Input-model, el input model, es la estructura de las entradas del backend, al generar la estructura en typescript, permitirá al equipo de front, poder tener la estructura de entrada de las peticiones.
+            3. model, modelo de datos, clases que representan el modelo de clases que será persistido.
+            4. Documentación, Trifenix connect requiere de una interfaz para obtener la documentación, debe indicarse el namespace donde se encuentra la inplementación.
+            </summary>
+        </member>
+        <member name="P:mdm_gen.Program.DataModelArguments.GitAddress">
+            <summary>
+            Url o ssh de la url de git del proyecto, esto permitirá modificar la rama y gatillar la generación de una nueva versión del paquete (si esta configurado el pipeline)
+            </summary>
+        </member>
+        <member name="P:mdm_gen.Program.DataModelArguments.modelNamespace">
+            <summary>
+            namespace del modelo de clases
+            </summary>
+        </member>
+        <member name="P:mdm_gen.Program.DataModelArguments.inputNamespace">
+            <summary>
+            namespace del input-model
+            </summary>
+        </member>
+        <member name="P:mdm_gen.Program.DataModelArguments.docsNamespace">
+            <summary>
+            namespace donde de encuentra la inplementación de IMdmDocumentation.
+            </summary>
+        </member>
+        <member name="P:mdm_gen.Program.DataModelArguments.Assembly">
+            <summary>
+            ruta del assembly
+            </summary>
+        </member>
+        <member name="P:mdm_gen.Program.DataModelArguments.username">
+            <summary>
+            Usuario que registra el cambio en el repositorio del componente
+            </summary>
+        </member>
+        <member name="P:mdm_gen.Program.DataModelArguments.email">
+            <summary>
+            correo que registra el cambio en el repositorio del componente
+            </summary>
+        </member>
+        <member name="P:mdm_gen.Program.DataModelArguments.branch">
+            <summary>
+            Rama que será sobrescrita en el github
+            </summary>
+        </member>
+        <member name="M:mdm_gen.Program.Main(System.String[])">
+            <summary>
+            Punto de entrada de la aplicación donde automáticamente se determina el flujo de acuerdo 
+            a los argumentos en la ejecución.
+            </summary>
+            <param name="args"></param>
+        </member>
+        <member name="M:mdm_gen.Program.ProcessArgs(mdm_gen.Program.ModelArguments)">
+            <summary>
+            Procesa el modelo de mdm en typescript
+            </summary>
+            <param name="ts"></param>
+        </member>
+        <member name="M:mdm_gen.Program.CreateBaseModelPackage(System.String,System.String,System.String,System.String)">
+            <summary>
+            Genera modelo mdm en typescript y lo sube al github de los argumentos
+            </summary>
+            <param name="gitAddress">dirección del github, debe incluír el token</param>
+            <param name="email">correo electrónico del usuario que registrará el commit</param>
+            <param name="username">nombre de usuario</param>
+            <param name="branch">rama del repositorio git</param>
+        </member>
+        <member name="M:mdm_gen.Program.CreateDataModel(System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String)">
+            <summary>
+            Genera el modelo de datos de un proyecto particular que use trifenix connect, 
+            utiliza como parámetro de entrada la ruta de la dll y los namespaces para capturar la metadata
+            </summary>
+            <param name="assembly">Assembly del programa</param>
+            <param name="modelNamespace">namespace del modelo</param>
+            <param name="inputNamespace">namespace del input</param>
+            <param name="documentNamespace">namespace del documento</param>
+            <param name="gitRepo">repositorio del git</param>
+            <param name="user">usuario git</param>
+            <param name="email">correo del usuario git</param>
+            <param name="branch">Rama master</param>
+        </member>
+    </members>
+</doc>

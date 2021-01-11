@@ -34,6 +34,7 @@ namespace mdm_gen
         /// <param name="baseDir">carpeta a borrar</param>
         public static bool RecursiveDelete(DirectoryInfo baseDir)
         {
+            // si no existe sale
             if (!baseDir.Exists)
                 return false;
 
@@ -58,8 +59,18 @@ namespace mdm_gen
             return true;
         }
 
-
-
+       
+        /// <summary>
+        /// Realiza commits determinados por commitMessageFIleOperations
+        /// genera un nuevo tag de acuerdo a la última versión.
+        /// envía al git determinado por los argumentos
+        /// </summary>
+        /// <param name="gitAddress">dirección del git (debería incluir el token)</param>
+        /// <param name="email">correo electrónico</param>
+        /// <param name="username">alejandro</param>
+        /// <param name="folder">carpeta donde se clonará el proyecto</param>
+        /// <param name="branch">rama donde se operará</param>
+        /// <param name="commitMessageFileOperations">Funciones por commit, por cada commit se ejecutará la función.</param>
         public static void StageCommitPush(string gitAddress, string email, string username, string folder, string branch, Dictionary<string, Func<bool>> commitMessageFileOperations) {
 
             
@@ -72,9 +83,11 @@ namespace mdm_gen
 
                 Colorful.Console.WriteLine($"Repositorio clonado", Color.OrangeRed);
 
+                // obtiene los tags desde el repositorio
                 var listTags = repo.Tags;
 
-                var fullTags = listTags.Select(s => {
+                // filtra tags, con un formato legible de SemVer.
+                var fullTags = listTags.Where(s=> s.FriendlyName.Split(".").Count() >3).Select(s => {
                     var splt = s.FriendlyName.Split(".", 3);
 
                     return new
@@ -85,36 +98,57 @@ namespace mdm_gen
                         full = s.FriendlyName
 
                     };
-                }).Where(s => int.TryParse(s.major, out var res) && int.TryParse(s.minor, out var res2) && int.TryParse(s.patch, out var res3));
 
+                })
+                .Where(s => int.TryParse(s.major, out var res) && int.TryParse(s.minor, out var res2) && int.TryParse(s.patch, out var res3))
+                .Select(s=>new 
+                    { 
+                        major = int.Parse(s.major) , 
+                        minor = int.Parse(s.minor), 
+                        patch = int.Parse(s.patch), 
+                        s.full  
+                
+                });
 
+                
+                // obtenemos los valores más altos.
                 var maxMajor = fullTags.Max(s => s.major);
                 var maxMinor = fullTags.Max(s => s.minor);
                 var maxPatch = fullTags.Max(s => s.patch);
 
-                var newTag = $"{maxMajor}.{maxMinor}.{int.Parse(maxPatch) + 1}";
+                // creamos el nuevo tag.
+                var newTag = $"{maxMajor}.{maxMinor}.{maxPatch + 1}";
 
+                // aplicamos el tag/
                 var tg = repo.ApplyTag(newTag);
+
 
                 Colorful.Console.WriteLine($"Generando nuevo tag : {newTag}", Color.OrangeRed);
 
-
+                // enviamos el tag al servidor 
                 repo.Network.Push(repo.Network.Remotes["origin"], tg.CanonicalName, new PushOptions { });
 
+                // carpeta de código fuente.
                 var srcFolder = Path.Combine(folder, "src");
 
+                // eliminamos archivos previos
                 Colorful.Console.WriteLine($"Eliminando archivos generados anteriormente", Color.OrangeRed);
+
+                // checkout a la rama.
                 Commands.Checkout(repo, branch);
 
+
+                //ejecutamos los commits del parámetro.
                 foreach (var actionMessage in commitMessageFileOperations)
                 {
                     var commit = actionMessage.Key;
 
                     if (actionMessage.Value.Invoke())
                     {
+                        // añade todos los archivos al stage, después de la ejecución de la operación de commit
                         Commands.Stage(repo, "*");
 
-                        // corregir, falla cuando no hay cambios, igual funciona por ahora.
+                        // commit al servidor
                         repo.Commit(commit, new Signature(username, email, DateTimeOffset.Now), new Signature(username, email, DateTimeOffset.Now)); 
                     }
 
@@ -131,16 +165,22 @@ namespace mdm_gen
         /// para luego actualizar la rama develop del componente
         /// </summary>
         /// <param name="gitAddress">repositorio git donde se actualizará</param>
-        /// <param name="email"></param>
-        /// <param name="username"></param>
-        public static void GenerateMdm(string gitAddress, string email, string username) {
+        /// <param name="email">correo del usuario git</param>
+        /// <param name="username">correo del usuario</param>
+        /// <param name="branch">correo del usuario</param>
+        public static void GenerateMdm(string gitAddress, string email, string username, string branch) {
 
+
+            // carpeta temporal donde se almacenará, ojo, esto puede causar complicaciones en ambientes linux.
             var folder = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), $"mdm-gen-{Guid.NewGuid()}")).FullName;
 
+
+            // carpeta donde se incorporará el código fuente generado.
             var srcFolder = Path.Combine(folder, "src");
 
 
-            StageCommitPush(gitAddress, email, username, folder, "master", new Dictionary<string, Func<bool>> { 
+            // elimina y agrega el contenido.
+            StageCommitPush(gitAddress, email, username, folder, branch, new Dictionary<string, Func<bool>> { 
                 { "Eliminando archivos generados anteriormente", ()=>RecursiveDelete(new DirectoryInfo(srcFolder)) },
                 { "+semver: patch", () => GenerateTsModel(srcFolder) }
 
@@ -157,10 +197,15 @@ namespace mdm_gen
         }
 
         
-
+        /// <summary>
+        /// Genera modelo typescript de acuerdo a un generator spec
+        /// </summary>
+        /// <param name="directory">carpeta donde generará el modelo</param>
+        /// <returns></returns>
         private static bool GenerateTsModel(string directory) {
             try
             {
+                // configuración general del spec
                 var options = new GeneratorOptions
                 {
                     BaseOutputDirectory = directory,
@@ -170,12 +215,16 @@ namespace mdm_gen
                     SingleQuotes = true
                 };
 
+                
                 var gen = new Generator(options);
 
+                // captura de evento
                 gen.FileContentGenerated += Gen_FileContentGenerated;
 
 
+                // genera typescript, de acuerdo a un spec.
                 gen.Generate(new List<GenerationSpec>() { new ModelSpec() });
+
                 return true;
             }
             catch (Exception)
@@ -186,6 +235,12 @@ namespace mdm_gen
             
         }
 
+
+        /// <summary>
+        /// Obtiene los tipos de un assembly (dll).
+        /// </summary>
+        /// <param name="assembly">dll obtenido desde una ruta</param>
+        /// <returns></returns>
         public static IEnumerable<Type> GetLoadableTypes(this Assembly assembly)
         {
             if (assembly == null) throw new ArgumentNullException(nameof(assembly));
@@ -200,7 +255,12 @@ namespace mdm_gen
         }
 
 
-
+        /// <summary>
+        /// Obtiene los tipos de un namespace en partícular
+        /// </summary>
+        /// <param name="assmbl">assembly a analizar</param>
+        /// <param name="ns">namespace a buscar</param>
+        /// <returns></returns>
         private static IEnumerable<Type> GetTypesFromNameSpace(Assembly assmbl, string ns) {
 
             var types = GetLoadableTypes(assmbl).ToList();
@@ -210,7 +270,11 @@ namespace mdm_gen
         }
 
 
-
+        /// <summary>
+        /// Muestra pantalla por cada evento de generación de archivo
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e">detalles del archivo generado</param>
         private static void Gen_FileContentGenerated(object sender, FileContentGeneratedArgs e)
         {
             Colorful.Console.WriteLine($"Generando archivo {new FileInfo(e.FilePath).Name}", Color.DarkGoldenrod);
@@ -218,6 +282,12 @@ namespace mdm_gen
 
        
 
+        /// <summary>
+        /// Obtiene la documentación desde un assembly, que implemente IMdmdDocumentation.
+        /// </summary>
+        /// <param name="assembly">assembly donde se buscará la implementación</param>
+        /// <param name="ns">namespace</param>
+        /// <returns>elemento de documentación desde el assemby</returns>
         private static IMdmDocumentation GetDocumentation(Assembly assembly, string ns) {
             var docImplementationType = GetDocumentationType(assembly, ns);
             
@@ -226,16 +296,31 @@ namespace mdm_gen
 
               
 
+
+        /// <summary>
+        /// Tipo que implementa documentación.
+        /// </summary>
+        /// <param name="assembly">assembly del proyecto, donde se buscará</param>
+        /// <param name="ns">namespace donde buscar</param>
+        /// <returns>Tipo de la implementación de documentación</returns>
         private static Type GetDocumentationType(Assembly assembly, string ns) => GetTypesFromNameSpace(assembly, ns).FirstOrDefault(s => s.GetInterface("IMdmDocumentation")!=null);
 
 
+        /// <summary>
+        /// Obtiene el modelo de una implementación de trifenix connect
+        /// </summary>
+        /// <param name="propertySearchInfo">información de cada propiedad de la entidad</param>
+        /// <param name="doc">Implementación de la documetación</param>
+        /// <param name="index">índice de la entidad</param>
+        /// <returns></returns>
         public static EntityMetadata GetModel(IEnumerable<PropertySearchInfo> propertySearchInfo, IMdmDocumentation doc, int index)
         {
 
-            
-
+            // obtiene el modelo general de la entidad
             var modelInfo = doc.GetInfoFromEntity(index);
 
+
+            // genera modelo de datos
             var modelDictionary = new EntityMetadata()
             {
                 Index = index,
@@ -250,19 +335,31 @@ namespace mdm_gen
                 GeoData = GetDictionaryFromRelated(propertySearchInfo, false, (int)KindProperty.GEO),
                 NumData = GetDictionaryFromRelated(propertySearchInfo, false, (int)KindProperty.NUM32),
                 relData = GetDictionaryFromRelated(propertySearchInfo, true, (int)KindEntityProperty.REFERENCE),
-
             };
+
+
+
+
             var suggestions = GetDictionaryFromRelated(propertySearchInfo, false, (int)KindProperty.SUGGESTION);
+
             var num64 = GetDictionaryFromRelated(propertySearchInfo, false, (int)KindProperty.NUM64);
+
             var suggestionNotInString = suggestions.Where(sg => !modelDictionary.StringData.Any(s => s.Key == sg.Key));
+
             var num64NotInNum = num64.Where(sg => !modelDictionary.NumData.Any(s => s.Key == sg.Key));
+
             var relLocal = GetDictionaryFromRelated(propertySearchInfo, true, (int)KindEntityProperty.LOCAL_REFERENCE);
+
+
+
             if (suggestionNotInString.Any())
                 foreach (var item in suggestionNotInString)
                     modelDictionary.StringData.Add(item.Key, item.Value);
+
             if (num64NotInNum.Any())
                 foreach (var item in num64NotInNum)
                     modelDictionary.NumData.Add(item.Key, item.Value);
+
             if (relLocal.Any())
                 foreach (var item in relLocal)
                     modelDictionary.relData.Add(item.Key, item.Value);

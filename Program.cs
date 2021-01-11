@@ -10,72 +10,98 @@ using System.Threading;
 
 namespace mdm_gen
 {
+
+    /// <summary>
+    /// Programa de línea de comandos para crear paquetes npn en javascript.
+    /// </summary>
     public class Program
     {
 
+
         /// <summary>
-        /// Tipo de generación data o modelo.
+        /// Se crea el verbo model, el cual permitirá tener los argumentos necesarios para ejecutar la creación del modelo de datos de mdm
+        /// en typescript y poder publicarla en un github definido por los parámetros.
+        /// Nuevos detalles de la definición en :
+        /// https://dev.azure.com/trifenix-connect/agrofenix/_sprints/taskboard/agrofenix%20Team/agrofenix/pre-Sprint?workitem=62
         /// </summary>
-        [Flags]
-        public enum GenKind{ 
-            data = 0,            
-            model = 1,
+        [Verb("model", HelpText = "Generación del modelo de datos de mdm-cli desde C# a typescript, haciendo un push en el git definido en los argumentos")]
+        public class ModelArguments {
+
+
+            [Value(0, Required = true, HelpText = "Url o ssh de la url de git del proyecto, el modelo resultado será públicado en este repositorio")]
+            public string GitAddress { get; set; }
+
+            /// <summary>
+            /// Usuario que registra el cambio en el repositorio del componente
+            /// </summary>
+
+            [Option('u', "user", Required = true, HelpText = "Usuario que registra el cambio en el repositorio del componente")]
+            public string username { get; set; }
+
+
+            /// <summary>
+            /// correo que registra el cambio en el repositorio del componente
+            /// </summary>
+            [Option('e', "email", Required = true, HelpText = "correo que registra el cambio en el repositorio del componente")]
+            public string email { get; set; }
+
+            /// <summary>
+            /// Rama que será sobrescrita en el github
+            /// </summary>
+            [Option('b', "branch", Required = false, HelpText = "rama que sobrescribirá en el código typescript", Default = "master")]
+            public string branch { get; set; }
+
         }
 
 
-        /// <summary>
-        /// Determina el tipo de rama a la que accederá.
-        /// </summary>
-      
 
         /// <summary>
-        /// El verbo determina el primer argumento después del nombre del progrmama, en este caso
-        /// mdm-gen typescrio [comandos]
+        /// Verbo para generar el modelo de datos de trifenix connect.
+        /// Este comando genera la metadata de yb proyecto que implemente el modelo de trifenix, entre elloas:
+        /// Con esta metadata el cliente tendrá todos los datos necesarios para operar
+        /// La estructura está formada desde los siguientes namespaces, necesarios como parámetros.
+        /// 1. Index-model, el index model es el diccionario que vincula los EntitySearch con las clases del modelo y el input.
+        /// 2. Input-model, el input model, es la estructura de las entradas del backend, al generar la estructura en typescript, permitirá al equipo de front, poder tener la estructura de entrada de las peticiones.
+        /// 3. model, modelo de datos, clases que representan el modelo de clases que será persistido.
+        /// 4. Documentación, Trifenix connect requiere de una interfaz para obtener la documentación, debe indicarse el namespace donde se encuentra la inplementación.
         /// </summary>
-        [Verb("typescript", HelpText = "Generación de mdm para typescript")]
-        public class TypeScriptArguments {
+        [Verb("data", HelpText = "Genera el modelo de datos de un proyecto que implemente trifenix connect")]
+        public class DataModelArguments {
+
+            /// <summary>
+            /// Url o ssh de la url de git del proyecto, esto permitirá modificar la rama y gatillar la generación de una nueva versión del paquete (si esta configurado el pipeline)
+            /// </summary>
+            [Value(0, Required = true, HelpText = "Url o ssh de la url de git del proyecto, el resultado será públicado en este repositorio")]
+            public string GitAddress { get; set; }
 
 
             /// <summary>
             /// namespace del modelo de clases
             /// </summary>
-            [Option('m', "model-namespace", Required = false, HelpText = "namespace del modelo de clases")]
+            [Option('m', "model-namespace", Required = true, HelpText = "namespace del modelo de clases")]
             public string modelNamespace { get; set; }
 
 
             /// <summary>
             /// namespace del input-model
             /// </summary>
-            [Option('i', "input-namespace", Required = false, HelpText = "namespace de las clases input")]
+            [Option('i', "input-namespace", Required = true, HelpText = "namespace de las clases input")]
             public string inputNamespace { get; set; }
 
 
             /// <summary>
             /// namespace donde de encuentra la inplementación de IMdmDocumentation.
             /// </summary>
-            [Option('d', "docs-namespace", Required = false, HelpText = "namespace donde se encuentre la implementación de IMdmDocumentation")]
+            [Option('d', "docs-namespace", Required = true, HelpText = "namespace donde se encuentre la implementación de IMdmDocumentation")]
             public string docsNamespace { get; set; }
 
 
             /// <summary>
             /// ruta del assembly
             /// </summary>
-            [Option('a', "assembly", Required = false, HelpText = "ruta del assembly")]
+            [Option('a', "assembly", Required = true, HelpText = "ruta del assembly")]
             public string Assembly { get; set; }
 
-
-            /// <summary>
-            /// tipo de generación
-            /// </summary>
-            [Option('t', "type", Required = false, HelpText = "tipo de generación, si es del modelo y no se indica el namespace, ni el ")]
-            public GenKind GenKind { get; set; } = GenKind.model;
-
-
-            /// <summary>
-            /// Url o ssh de la url de git del proyecto, esto permitirá modificar la rama y gatillar la generación de una nueva versión del paquete (si esta configurado el pipeline)
-            /// </summary>
-            [Value(0, Required = true, HelpText = "Url o ssh de la url de git del proyecto, esto permitirá modificar la rama y gatillar la generación de una nueva versión del paquete (si esta configurado el pipeline)")]
-            public string GitAddress { get; set; }
 
             /// <summary>
             /// Usuario que registra el cambio en el repositorio del componente
@@ -95,7 +121,7 @@ namespace mdm_gen
             /// <summary>
             /// Rama que será sobrescrita en el github
             /// </summary>
-            [Option('b', "branch", Required = true, HelpText = "rama que sobrescribirá en el código typescript")]
+            [Option('b', "branch", Required = false, HelpText = "rama que sobrescribirá en el código typescript", Default = "master")]
             public string branch  { get; set; }
 
 
@@ -112,13 +138,10 @@ namespace mdm_gen
         {
 
             // vincula los argumentos de la ejecución con los tipos de los argumentos.
-            var result = Parser.Default.ParseArguments<TypeScriptArguments, object>(args);
+            var result = Parser.Default.ParseArguments<ModelArguments, object>(args);
 
             // procesa los resultados, usando los argumentos como entrada.
-            result.WithParsed<TypeScriptArguments>(ProcessArgs);
-
-
-            result.WithParsed<object>((obj)=> { });
+            result.WithParsed<ModelArguments>(ProcessArgs);
 
 
         }
@@ -126,24 +149,17 @@ namespace mdm_gen
 
 
         /// <summary>
-        /// 
+        /// Procesa el modelo de mdm en typescript
         /// </summary>
         /// <param name="ts"></param>
-        public static void ProcessArgs(TypeScriptArguments ts) {
-
-
+        public static void ProcessArgs(ModelArguments ts) {
 
             //FIGlet es una aplicación informática que genera banners de texto, en varias tipografías, formadas por letras compuestas por conglomerados de caracteres ASCII más pequeños.
 
             var currentDitectory = AppDomain.CurrentDomain.BaseDirectory;
-
             var fontPath = Path.Combine(currentDitectory, "figlet/small");
+            var fontTitle = new Figlet(Colorful.FigletFont.Load(fontPath));
 
-            Colorful.Console.WriteLine($"ruta finglets img 1: {fontPath} ");
-
-            var fontTitle = new Figlet(Colorful.FigletFont.Load(fontPath));            
-
-            // trifenix con figlet :)
             Colorful.Console.WriteLine(fontTitle.ToAscii("Trifenix Connect"), Color.Red);
 
             // metadata model
@@ -154,21 +170,24 @@ namespace mdm_gen
 
             Colorful.Console.WriteLine("Usted ha seleccionado la generación de paquetes de Typescript", Color.DarkGreen);
 
+            Colorful.Console.WriteLine("Generación de paquete con los tipos base de MDM", Color.DarkGreen);
+
+            // Usa typegen para generar el módelo.
+            CreateBaseModelPackage(ts.GitAddress, ts.email, ts.username, ts.branch);
 
 
+            //if (ts.GenKind == GenKind.model && string.IsNullOrWhiteSpace(ts.modelNamespace))
+            //{
+                
+            //}
+            //else if (ts.GenKind == GenKind.data) {
 
-            if (ts.GenKind == GenKind.model && string.IsNullOrWhiteSpace(ts.modelNamespace))
-            {
-                Colorful.Console.WriteLine("Generación de paquete con los tipos base de MDM", Color.DarkGreen);
-                CreateBaseModelPackage(ts.GitAddress, ts.email, ts.username);
-            }
-            else if (ts.GenKind == GenKind.data) {
-
-                Colorful.Console.WriteLine("Generación datos del modelo", Color.DarkGreen);
-                CreateDataModel(ts.Assembly, ts.modelNamespace, ts.inputNamespace, ts.docsNamespace, ts.GitAddress, ts.username, ts.email, ts.branch);
+            //    // comienzo creación de modelo de datos. 
+            //    Colorful.Console.WriteLine("Generación datos del modelo", Color.DarkGreen);
+            //    CreateDataModel(ts.Assembly, ts.modelNamespace, ts.inputNamespace, ts.docsNamespace, ts.GitAddress, ts.username, ts.email, ts.branch);
 
                 
-            }
+            //}
 
 
 
@@ -176,10 +195,30 @@ namespace mdm_gen
         }
 
 
-        public static void CreateBaseModelPackage(string gitAddress, string email, string username) {
-            MdmGen.GenerateMdm(gitAddress, email, username);
+        /// <summary>
+        /// Genera modelo mdm en typescript y lo sube al github de los argumentos
+        /// </summary>
+        /// <param name="gitAddress">dirección del github, debe incluír el token</param>
+        /// <param name="email">correo electrónico del usuario que registrará el commit</param>
+        /// <param name="username">nombre de usuario</param>
+        /// <param name="branch">rama del repositorio git</param>
+        public static void CreateBaseModelPackage(string gitAddress, string email, string username, string branch) {
+            MdmGen.GenerateMdm(gitAddress, email, username, branch);
         }
 
+
+        /// <summary>
+        /// Genera el modelo de datos de un proyecto particular que use trifenix connect, 
+        /// utiliza como parámetro de entrada la ruta de la dll y los namespaces para capturar la metadata
+        /// </summary>
+        /// <param name="assembly">Assembly del programa</param>
+        /// <param name="modelNamespace">namespace del modelo</param>
+        /// <param name="inputNamespace">namespace del input</param>
+        /// <param name="documentNamespace">namespace del documento</param>
+        /// <param name="gitRepo">repositorio del git</param>
+        /// <param name="user">usuario git</param>
+        /// <param name="email">correo del usuario git</param>
+        /// <param name="branch">Rama master</param>
         public static void CreateDataModel(string assembly, string modelNamespace, string inputNamespace, string documentNamespace, string gitRepo, string user, string email, string branch) {
             MdmGen.GenerateDataMdm(assembly, modelNamespace, inputNamespace, documentNamespace, gitRepo, user, email, branch);
         }

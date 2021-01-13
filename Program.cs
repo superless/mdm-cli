@@ -140,12 +140,54 @@ namespace mdm_gen
             // vincula los argumentos de la ejecución con los tipos de los argumentos.
             var result = Parser.Default.ParseArguments<ModelArguments, object>(args);
 
-            // procesa los resultados, usando los argumentos como entrada.
-            result.WithParsed<ModelArguments>(ProcessArgs);
+            if (result.Tag != ParserResultType.NotParsed)
+            {
+                // procesa los resultados, usando los argumentos como entrada.
+                result.WithParsed<ModelArguments>(ProcessArgs);
+                return;
+            }
+
+            var resultData = Parser.Default.ParseArguments<DataModelArguments, object>(args);
+
+            if (resultData.Tag != ParserResultType.NotParsed)
+            {
+                // procesa los resultados, usando los argumentos como entrada.
+                resultData.WithParsed<DataModelArguments>(ProcessDataArgs);
+                
+            }
+
+
 
 
         }
 
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="ts"></param>
+        public static void ProcessDataArgs(DataModelArguments ts) {
+            var currentDitectory = AppDomain.CurrentDomain.BaseDirectory;
+            var fontPath = Path.Combine(currentDitectory, "figlet/small");
+            var fontTitle = new Figlet(Colorful.FigletFont.Load(fontPath));
+
+            Colorful.Console.WriteLine(fontTitle.ToAscii("Trifenix Connect"), Color.Red);
+
+            // metadata model
+            Colorful.Console.WriteLine(fontTitle.ToAscii("MDM"), Color.Purple);
+
+            // generación de código para trifenix connect.
+            Colorful.Console.WriteLine("Bienvenido a la generación de código de trifenix connect mdm", Color.BlueViolet);
+
+            Colorful.Console.WriteLine("Usted ha seleccionado la generación de paquetes de Typescript para generar el modelo", Color.DarkGreen);
+
+            Colorful.Console.WriteLine("Generación de paquete con la información", Color.DarkGreen);
+
+            Colorful.Console.WriteLine("Generación datos del modelo", Color.DarkGreen);
+
+            CreateDataModel(ts.Assembly, ts.modelNamespace, ts.inputNamespace, ts.docsNamespace, ts.GitAddress, ts.username, ts.email, ts.branch);
+
+        }
 
 
         /// <summary>

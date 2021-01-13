@@ -111,14 +111,21 @@ namespace mdm_gen
                 
                 });
 
-                
-                // obtenemos los valores más altos.
-                var maxMajor = fullTags.Max(s => s.major);
-                var maxMinor = fullTags.Max(s => s.minor);
-                var maxPatch = fullTags.Max(s => s.patch);
+                string newTag = string.Empty;
 
-                // creamos el nuevo tag.
-                var newTag = $"{maxMajor}.{maxMinor}.{maxPatch + 1}";
+                if (fullTags.Any())
+                {
+                    // obtenemos los valores más altos.
+                    var maxMajor = fullTags.Max(s => s.major);
+                    var maxMinor = fullTags.Max(s => s.minor);
+                    var maxPatch = fullTags.Max(s => s.patch);
+
+                    // creamos el nuevo tag.
+                    newTag = $"{maxMajor}.{maxMinor}.{maxPatch + 1}";
+                }
+                else {
+                    newTag = "0.0.1";
+                }
 
                 // aplicamos el tag/
                 var tg = repo.ApplyTag(newTag);

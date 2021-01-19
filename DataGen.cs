@@ -38,8 +38,12 @@ namespace mdm_gen
         private static IEnumerable<Type> GetTypesFromNameSpace(Assembly assmbl, string ns) {
 
             var types = assmbl.GetLoadableTypes().ToList();
+            var otherTypes1 = assmbl.GetTypes();
+
 
             var rtnTypes = types.Where(x => x.FullName.StartsWith($"{ns}."));
+
+
             return rtnTypes;
         }
 
@@ -192,7 +196,106 @@ namespace mdm_gen
         }
 
 
+        /// <summary>
+        /// Genera modelo, input model y enums para trifenix connect.
+        /// </summary>
+        /// <param name="models">tipos de modelo</param>
+        /// <param name="inputs">tipos de inputs</param>
+        /// <param name="mdm_enums">tipos de mdm</param>
+        /// <param name="srcFolder">carpeta del código fuente</param>
+        public static void GenerateModelStructure(IEnumerable<Type> models, IEnumerable<Type> inputs, IEnumerable<Type> mdm_enums, string srcFolder) {
+            // generación del modelo
+            var options = new GeneratorOptions
+            {
+                BaseOutputDirectory = srcFolder,
+                CreateIndexFile = true,
+                PropertyNameConverters = new MemberNameConverterCollection(new IMemberNameConverter[] { new JsonMemberNameConverter(), new PascalCaseToCamelCaseConverter() }),
+                FileNameConverters = new TypeNameConverterCollection(new ITypeNameConverter[] { }),
+                SingleQuotes = true,
+                
+            };
 
+
+            var gen = new Generator(options);
+
+            // captura de evento
+            gen.FileContentGenerated += (s, e) => Colorful.Console.WriteLine($"Generando archivo {new FileInfo(e.FilePath).Name}", Color.DarkGoldenrod);
+
+
+            // genera typescript, de acuerdo a un spec.
+            gen.Generate(new List<GenerationSpec>() { new DataSpec(models, inputs, mdm_enums) });
+
+            FixDataModel(srcFolder);
+        }
+
+        public static void FixDataModel(string srcFolder) {
+
+            var lst = new List<string>();
+
+            var modelDir = Path.Combine(srcFolder, "model/");
+            var inputDir = Path.Combine(srcFolder, "input-model/");
+            var filesModel = Directory.GetFiles(modelDir).ToList();
+            var filesInput = Directory.GetFiles(inputDir).ToList();
+            lst.AddRange(filesModel);
+            lst.AddRange(filesInput);
+
+            var grp = lst.Where(s=>!s.Contains("index.ts")).GroupBy(s => Path.GetFileNameWithoutExtension(s)).Where(s => s.Count() > 1).ToDictionary(s => s.Key);
+
+
+            foreach (var item in grp)
+            {
+                var file = item.Key;
+                
+                var extradirectory = Path.Combine(srcFolder, "extra/");
+                Directory.CreateDirectory(extradirectory);
+                var i = 0;
+                foreach (var itemFile in item.Value)
+                {
+                    if (i == 0)
+                    {
+                        File.Copy(itemFile, Path.Combine(extradirectory, $"{file}.ts"));
+                    }
+                    File.Delete(itemFile);
+                    i++;
+                }
+
+                // replace reference
+                ReplaceReference(modelDir, file);
+                ReplaceReference(inputDir, file);
+                var indexModel = Path.Combine(modelDir, "index.ts");
+                var indexInputModel = Path.Combine(inputDir, "index.ts");
+                var linesModel = File.ReadAllLines(indexModel).ToList();
+                var linesInputModel = File.ReadAllLines(indexInputModel).ToList();
+                linesModel.RemoveAt(GetIndex(linesModel, file));
+                linesInputModel.RemoveAt(GetIndex(linesInputModel, file));
+                File.WriteAllLines(indexModel, linesModel);
+                File.WriteAllLines(indexInputModel, linesInputModel);
+
+
+            }
+        }
+
+        private static int GetIndex(IEnumerable<string> lines, string fileWithoutExtension) => lines.Select((s, i) => new { Str = s, Index = i })
+                    .Where(x => x.Str.Contains(fileWithoutExtension) && x.Str.Contains("from"))
+                    .Select(x => x.Index).First();
+
+        public static void ReplaceReference(string pathDirectory, string fileWithoutExtension) {
+            var files = Directory.GetFiles(pathDirectory);
+            foreach (var item in files)
+            {
+                var lines = File.ReadAllLines(item);
+                if (lines.Any(s => s.Contains(fileWithoutExtension) && s.Contains("import")))
+                {
+                    var index = GetIndex(lines, fileWithoutExtension);
+
+                    var split = lines[index].Split("from");
+                    var textToReplace = split[1].Replace($"'./{fileWithoutExtension}'", $"'./../extra/{fileWithoutExtension}'");
+                    lines[index] = $"{split[0]} from {textToReplace}";
+                    File.WriteAllLines(item, lines);
+                }
+            }
+
+        }
 
         /// <summary>
         /// Genera modelo de datos desde una dll de un proyecto
@@ -201,20 +304,35 @@ namespace mdm_gen
         /// <param name="assembly">dll de donde obtendrá los valores</param>
         /// <param name="modelNamespace">namespace donde se encuentra el modelo</param>
         /// <param name="inputNamespace">namespace donde se encuentra el input-model</param>
+        /// <param name="index_model_namespace">namespace del diccionario mdm</param>
         /// <param name="documentNamespace">namespace donde se encuentra la implementación de IMDMDocumentation</param>
         /// <param name="gitRepo">repositorio donde se subirá la información</param>
         /// <param name="user">nombre de usuario git</param>
         /// <param name="email">correo git</param>
         /// <param name="branch">rama</param>
-        public static void GenerateDataMdm(string assembly, string modelNamespace, string inputNamespace, string documentNamespace, string gitRepo, string user, string email, string branch)
+        public static void GenerateDataMdm(string assembly, string modelNamespace, string inputNamespace, string index_model_namespace, string documentNamespace, string gitRepo, string user, string email, string branch)
         {
 
             // assembly
             var assemblyInput = Assembly.LoadFrom(assembly);
 
+            // carpeta temporal, donde se creará el modelo
+            var folder = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), $"mdm-data-{Guid.NewGuid()}")).FullName;
+
+            // carpeta código fuente.
+            var srcFolder = Path.Combine(folder, "src");
 
             // modelo
             var modelTypes = GetTypesFromNameSpace(assemblyInput, modelNamespace);
+
+            // input types
+            var inputTypes = GetTypesFromNameSpace(assemblyInput, inputNamespace);
+
+            // enum types
+
+            var enumTypes = GetTypesFromNameSpace(assemblyInput, index_model_namespace);
+
+          
 
 
             // documentación
@@ -272,25 +390,28 @@ namespace mdm_gen
 
 
 
-            // carpeta temporal, donde se creará el modelo
-            var folder = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), $"mdm-data-{Guid.NewGuid()}")).FullName;
+            
 
 
-            // carpeta código fuente.
-            var srcFolder = Path.Combine(folder, "src");
+            
 
 
             // archivo a generar.
-            var file =  Path.Combine(srcFolder, "index.ts");
+            var file =  Path.Combine(srcFolder, "metadata/mdm.ts");
 
 
 
             // commit y envío.
-            GenUtil.Git.StageCommitPush(gitRepo, email, user, folder, branch, new Dictionary<string, Func<bool>> { { "datos cargados", () => {
-               
+            GenUtil.Git.StageCommitPush(gitRepo, email, user, folder, branch, new Dictionary<string, Func<bool>> {
+                { "Eliminando archivos generados anteriormente", ()=>GenUtil.RecursiveDelete(new DirectoryInfo(srcFolder)) },
+                { "creando modelo", ()=> {
+                    GenerateModelStructure(modelTypes, inputTypes, enumTypes, srcFolder );
+                    return true;
+                } },
+                { "datos cargados", () => {
                  File.WriteAllText(file, $"import {{ ModelMetaData }} from \"@trifenix/mdm\"; \nexport const data:ModelMetaData = {json} as ModelMetaData");
                  return true;
-            } } });
+            } } });;
 
 
             // genera el json con datos

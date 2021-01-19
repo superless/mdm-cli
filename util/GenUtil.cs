@@ -55,6 +55,7 @@ namespace trifenix.util
             }
             catch (ReflectionTypeLoadException e)
             {
+                var tp = e.Types.Where(t => t == null).ToList();
                 return e.Types.Where(t => t != null);
             }
         }

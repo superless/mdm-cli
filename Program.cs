@@ -95,6 +95,10 @@ namespace mdm_gen
             public string docsNamespace { get; set; }
 
 
+            [Option('n', "enum-model", Required = true, HelpText = "namespace de los diccionarios de entitySearch (enums)")]
+            public string esModelNamespace { get; set; }
+
+
             /// <summary>
             /// ruta del assembly
             /// </summary>
@@ -182,7 +186,7 @@ namespace mdm_gen
 
             Colorful.Console.WriteLine("Generación datos del modelo", Color.DarkGreen);
 
-            CreateDataModel(ts.Assembly, ts.modelNamespace, ts.inputNamespace, ts.docsNamespace, ts.GitAddress, ts.username, ts.email, ts.branch);
+            CreateDataModel(ts.Assembly, ts.modelNamespace, ts.inputNamespace, ts.docsNamespace, ts.esModelNamespace , ts.GitAddress, ts.username, ts.email, ts.branch);
 
         }
 
@@ -214,23 +218,6 @@ namespace mdm_gen
             // Usa typegen para generar el módelo.
             CreateBaseModelPackage(ts.GitAddress, ts.email, ts.username, ts.branch);
 
-
-            //if (ts.GenKind == GenKind.model && string.IsNullOrWhiteSpace(ts.modelNamespace))
-            //{
-                
-            //}
-            //else if (ts.GenKind == GenKind.data) {
-
-            //    // comienzo creación de modelo de datos. 
-            //    Colorful.Console.WriteLine("Generación datos del modelo", Color.DarkGreen);
-            //    CreateDataModel(ts.Assembly, ts.modelNamespace, ts.inputNamespace, ts.docsNamespace, ts.GitAddress, ts.username, ts.email, ts.branch);
-
-                
-            //}
-
-
-
-         
         }
 
 
@@ -254,12 +241,13 @@ namespace mdm_gen
         /// <param name="modelNamespace">namespace del modelo</param>
         /// <param name="inputNamespace">namespace del input</param>
         /// <param name="documentNamespace">namespace del documento</param>
+        /// <param name="index_model_namespace">mdm diccionario</param>
         /// <param name="gitRepo">repositorio del git</param>
         /// <param name="user">usuario git</param>
         /// <param name="email">correo del usuario git</param>
         /// <param name="branch">Rama master</param>
-        public static void CreateDataModel(string assembly, string modelNamespace, string inputNamespace, string documentNamespace, string gitRepo, string user, string email, string branch) {
-            DataGen.GenerateDataMdm(assembly, modelNamespace, inputNamespace, documentNamespace, gitRepo, user, email, branch);
+        public static void CreateDataModel(string assembly, string modelNamespace, string inputNamespace, string documentNamespace, string index_model_namespace, string gitRepo, string user, string email, string branch) {
+            DataGen.GenerateDataMdm(assembly, modelNamespace, inputNamespace, index_model_namespace, documentNamespace, gitRepo, user, email, branch);
         }
 
 

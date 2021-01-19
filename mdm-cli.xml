@@ -66,7 +66,16 @@
             <param name="propSearchInfos">Colección de metadata, donde se buscará la enumeración</param>
             <returns>metadata de las enumeraciones de un elemento.</returns>
         </member>
-        <member name="M:mdm_gen.DataGen.GenerateDataMdm(System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String)">
+        <member name="M:mdm_gen.DataGen.GenerateModelStructure(System.Collections.Generic.IEnumerable{System.Type},System.Collections.Generic.IEnumerable{System.Type},System.Collections.Generic.IEnumerable{System.Type},System.String)">
+            <summary>
+            Genera modelo, input model y enums para trifenix connect.
+            </summary>
+            <param name="models">tipos de modelo</param>
+            <param name="inputs">tipos de inputs</param>
+            <param name="mdm_enums">tipos de mdm</param>
+            <param name="srcFolder">carpeta del código fuente</param>
+        </member>
+        <member name="M:mdm_gen.DataGen.GenerateDataMdm(System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String)">
             <summary>
             Genera modelo de datos desde una dll de un proyecto
             que implemente trifenix connect.
@@ -74,6 +83,7 @@
             <param name="assembly">dll de donde obtendrá los valores</param>
             <param name="modelNamespace">namespace donde se encuentra el modelo</param>
             <param name="inputNamespace">namespace donde se encuentra el input-model</param>
+            <param name="index_model_namespace">namespace del diccionario mdm</param>
             <param name="documentNamespace">namespace donde se encuentra la implementación de IMDMDocumentation</param>
             <param name="gitRepo">repositorio donde se subirá la información</param>
             <param name="user">nombre de usuario git</param>
@@ -247,7 +257,7 @@
             <param name="username">nombre de usuario</param>
             <param name="branch">rama del repositorio git</param>
         </member>
-        <member name="M:mdm_gen.Program.CreateDataModel(System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String)">
+        <member name="M:mdm_gen.Program.CreateDataModel(System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String)">
             <summary>
             Genera el modelo de datos de un proyecto particular que use trifenix connect, 
             utiliza como parámetro de entrada la ruta de la dll y los namespaces para capturar la metadata
@@ -256,6 +266,7 @@
             <param name="modelNamespace">namespace del modelo</param>
             <param name="inputNamespace">namespace del input</param>
             <param name="documentNamespace">namespace del documento</param>
+            <param name="index_model_namespace">mdm diccionario</param>
             <param name="gitRepo">repositorio del git</param>
             <param name="user">usuario git</param>
             <param name="email">correo del usuario git</param>

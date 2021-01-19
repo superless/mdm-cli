@@ -10,6 +10,9 @@ namespace trifenix.util
 {
     public static partial  class GenUtil
     {
+        /// <summary>
+        /// Clase estática destinada a realizar operaciones git.
+        /// </summary>
         public static partial class Git {
             /// <summary>
             /// Realiza commits determinados por commitMessageFIleOperations

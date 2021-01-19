@@ -12,7 +12,12 @@ namespace mdm_gen
     /// </summary>
     public class JsonMemberNameConverter : IMemberNameConverter
     {
-        //TypeNameConverterCollection
+        /// <summary>
+        /// usa convert para quitar la primera letra si es interface.
+        /// </summary>
+        /// <param name="name">nombre de la propiedad o clase</param>
+        /// <param name="memberInfo">tipo de miembro (propiedad, enum, clase, interface, etc.)</param>
+        /// <returns></returns>
         public string Convert(string name, MemberInfo memberInfo)
         {
             var attribute = memberInfo.GetCustomAttribute<JsonPropertyAttribute>();

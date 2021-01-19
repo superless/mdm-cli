@@ -7,6 +7,9 @@ using System.Text;
 
 namespace trifenix.util
 {
+    /// <summary>
+    /// Clase estática con utilidades para la generación de typescript
+    /// </summary>
     public static partial  class GenUtil
     {
         /// <summary>

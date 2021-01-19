@@ -27,6 +27,9 @@ namespace mdm_gen
         public class ModelArguments {
 
 
+            /// <summary>
+            /// Git donde se actualizará el modelo.
+            /// </summary>
             [Value(0, Required = true, HelpText = "Url o ssh de la url de git del proyecto, el modelo resultado será públicado en este repositorio")]
             public string GitAddress { get; set; }
 
@@ -95,6 +98,9 @@ namespace mdm_gen
             public string docsNamespace { get; set; }
 
 
+            /// <summary>
+            /// namespace de las enumeraciones de tipos de entitySearch.
+            /// </summary>
             [Option('n', "enum-model", Required = true, HelpText = "namespace de los diccionarios de entitySearch (enums)")]
             public string esModelNamespace { get; set; }
 

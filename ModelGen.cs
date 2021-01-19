@@ -9,6 +9,9 @@ using TypeGen.Core.SpecGeneration;
 
 namespace mdm_gen
 {
+    /// <summary>
+    /// Crea el modelo de entitySearch en Typescript.
+    /// </summary>
     public static class ModelGen {
         /// <summary>
         /// Genera las clases en typescript desde el repositorio que se le asigne

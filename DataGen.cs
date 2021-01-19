@@ -228,6 +228,10 @@ namespace mdm_gen
             FixDataModel(srcFolder);
         }
 
+        /// <summary>
+        /// cambia referencias de modelos duplicados.
+        /// </summary>
+        /// <param name="srcFolder">carpeta del código fuente</param>
         public static void FixDataModel(string srcFolder) {
 
             var lst = new List<string>();
@@ -275,10 +279,22 @@ namespace mdm_gen
             }
         }
 
+        /// <summary>
+        /// Obtiene el índice de una referencia (using from de typescript), si encuentra un patrón (nombre de un archivo sin extensión)
+        /// </summary>
+        /// <param name="lines">lineas con texto</param>
+        /// <param name="fileWithoutExtension">archivo a buscar</param>
+        /// <returns>índice donde encuentra el archivo</returns>
         private static int GetIndex(IEnumerable<string> lines, string fileWithoutExtension) => lines.Select((s, i) => new { Str = s, Index = i })
                     .Where(x => x.Str.Contains(fileWithoutExtension) && x.Str.Contains("from"))
                     .Select(x => x.Index).First();
 
+
+        /// <summary>
+        /// Reemplaza las referencias, por una en la carpeta extra, con el mismo nombre de archivo.
+        /// </summary>
+        /// <param name="pathDirectory">ruta de la carpeta donde se cambiarán las referencias</param>
+        /// <param name="fileWithoutExtension">archivo sin extensión a buscar y reemplazar la ruta a extra</param>
         public static void ReplaceReference(string pathDirectory, string fileWithoutExtension) {
             var files = Directory.GetFiles(pathDirectory);
             foreach (var item in files)

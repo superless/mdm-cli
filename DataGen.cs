@@ -425,7 +425,7 @@ namespace mdm_gen
                     return true;
                 } },
                 { "datos cargados", () => {
-                 File.WriteAllText(file, $"import {{ ModelMetaData }} from \"@trifenix/mdm\"; \nexport const data:ModelMetaData = {json} as ModelMetaData");
+                 File.WriteAllText(file, $"import {{ ModelMetaData }} from \"@trifenix/mdm\"; \nexport const mdm:ModelMetaData = {json} as ModelMetaData");
                  return true;
             } } });;
 

@@ -51,7 +51,7 @@ namespace mdm_gen
         /// <summary>
         /// Muestra pantalla por cada evento de generación de archivo
         /// </summary>
-        /// <param name="sender"></param>
+        /// <param name="sender">objeto que envía el evento.</param>
         /// <param name="e">detalles del archivo generado</param>
         private static void Gen_FileContentGenerated(object sender, FileContentGeneratedArgs e)
         {

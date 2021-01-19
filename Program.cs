@@ -17,7 +17,6 @@ namespace mdm_gen
     public class Program
     {
 
-
         /// <summary>
         /// Se crea el verbo model, el cual permitirá tener los argumentos necesarios para ejecutar la creación del modelo de datos de mdm
         /// en typescript y poder publicarla en un github definido por los parámetros.
@@ -137,6 +136,8 @@ namespace mdm_gen
         static void Main(string[] args)
         {
 
+            
+
             // vincula los argumentos de la ejecución con los tipos de los argumentos.
             var result = Parser.Default.ParseArguments<ModelArguments, object>(args);
 
@@ -155,10 +156,6 @@ namespace mdm_gen
                 resultData.WithParsed<DataModelArguments>(ProcessDataArgs);
                 
             }
-
-
-
-
         }
 
 
@@ -245,7 +242,7 @@ namespace mdm_gen
         /// <param name="username">nombre de usuario</param>
         /// <param name="branch">rama del repositorio git</param>
         public static void CreateBaseModelPackage(string gitAddress, string email, string username, string branch) {
-            MdmGen.GenerateMdm(gitAddress, email, username, branch);
+            ModelGen.GenerateMdm(gitAddress, email, username, branch);
         }
 
 
@@ -262,7 +259,7 @@ namespace mdm_gen
         /// <param name="email">correo del usuario git</param>
         /// <param name="branch">Rama master</param>
         public static void CreateDataModel(string assembly, string modelNamespace, string inputNamespace, string documentNamespace, string gitRepo, string user, string email, string branch) {
-            MdmGen.GenerateDataMdm(assembly, modelNamespace, inputNamespace, documentNamespace, gitRepo, user, email, branch);
+            DataGen.GenerateDataMdm(assembly, modelNamespace, inputNamespace, documentNamespace, gitRepo, user, email, branch);
         }
 
 

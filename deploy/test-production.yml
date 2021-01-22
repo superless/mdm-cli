@@ -13,6 +13,15 @@ variables:
   name-project: "mdm-cli"
 
 steps:
+  # toma todos los proyectos que existan además de quien tiene el nuget.
+  - task: DotNetCoreCLI@2
+    inputs:
+      command: 'restore'
+      projects: '**/*.csproj'
+      feedsToUse: 'select'
+      vstsFeed: '$(default-feed)'      
+      versioningScheme: byBuildNumber
+
   # genera paquete usando la versión proporcionada por gitversion
   - task: DotNetCoreCLI@2
     displayName: 'dotnet pack' 

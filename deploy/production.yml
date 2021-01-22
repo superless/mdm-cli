@@ -12,7 +12,6 @@ variables:
   # nombre del archivo csproj
   name-project: "mdm-cli"
 
-
 steps:
 
   - task: gitversion/setup@0

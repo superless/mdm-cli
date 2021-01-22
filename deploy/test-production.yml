@@ -28,8 +28,6 @@ steps:
     inputs: 
       command: pack
       packagesToPack: '**/$(name-project).csproj'       
-      arguments: '--configuration $(BuildConfiguration)' 
-      versioningScheme: byEnvVar 
-      versionEnvVar: SemVer
+      arguments: '--configuration $(BuildConfiguration)'
 
   

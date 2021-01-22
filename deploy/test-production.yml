@@ -1,0 +1,26 @@
+# termine, parte 1.
+
+trigger:
+    branches:
+      include:        
+        - master  
+pool:
+  vmImage: "ubuntu-16.04"
+
+variables: 
+  BuildConfiguration: 'release'
+  # nombre del archivo csproj
+  name-project: "mdm-cli"
+
+steps:
+  # genera paquete usando la versión proporcionada por gitversion
+  - task: DotNetCoreCLI@2
+    displayName: 'dotnet pack' 
+    inputs: 
+      command: pack
+      packagesToPack: '**/$(name-project).csproj'       
+      arguments: '--configuration $(BuildConfiguration) /p:Version=$(SemVer)' 
+      versioningScheme: byEnvVar 
+      versionEnvVar: SemVer
+
+  

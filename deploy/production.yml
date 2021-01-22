@@ -12,13 +12,7 @@ variables:
   # nombre del archivo csproj
   name-project: "mdm-cli"
 
-  
-# github ejecuta este build, para validar y ejecutar,
-# es decir, dos veces
-# esta instrucción asigna que no se ejecute en el pull request (para validar).
-# sino, que solo se ejecute al modificar la rama.
-pr: none
-  
+
 steps:
 
   - task: gitversion/setup@0

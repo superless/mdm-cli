@@ -28,15 +28,15 @@ namespace mdm_gen
             AddInterface<ModelMetaData>("data/");
             AddInterface<EntityMetadata>("data/");
             AddInterface(typeof(EntityBaseSearch<>), "model/main")
-                .Member(nameof(EntityBaseSearch<Object>.bl)).Type("BoolProperty", "./BoolProperty")
-                .Member(nameof(EntityBaseSearch<Object>.dbl)).Type("DblProperty", "./DblProperty")                
-                .Member(nameof(EntityBaseSearch<Object>.enm)).Type("EnumProperty", "./EnumProperty")
-                .Member(nameof(EntityBaseSearch<Object>.dt)).Type("DtProperty", "./DtProperty")
-                .Member(nameof(EntityBaseSearch<Object>.num32)).Type("Num32Property", "./Num32Property")
-                .Member(nameof(EntityBaseSearch<Object>.num64)).Type("Num64Property", "./Num64Property")
-                .Member(nameof(EntityBaseSearch<Object>.rel)).Type("RelatedId", "./RelatedId")
-                .Member(nameof(EntityBaseSearch<Object>.str)).Type("StrProperty", "./StrProperty")
-                .Member(nameof(EntityBaseSearch<Object>.sug)).Type("StrProperty", "./StrProperty")
+                .Member(nameof(EntityBaseSearch<Object>.bl)).Type("BoolProperty", "./BoolProperty[]")
+                .Member(nameof(EntityBaseSearch<Object>.dbl)).Type("DblProperty", "./DblProperty[]")                
+                .Member(nameof(EntityBaseSearch<Object>.enm)).Type("EnumProperty", "./EnumProperty[]")
+                .Member(nameof(EntityBaseSearch<Object>.dt)).Type("DtProperty", "./DtProperty[]")
+                .Member(nameof(EntityBaseSearch<Object>.num32)).Type("Num32Property", "./Num32Property[]")
+                .Member(nameof(EntityBaseSearch<Object>.num64)).Type("Num64Property", "./Num64Property[]")
+                .Member(nameof(EntityBaseSearch<Object>.rel)).Type("RelatedId", "./RelatedId[]")
+                .Member(nameof(EntityBaseSearch<Object>.str)).Type("StrProperty", "./StrProperty[]")
+                .Member(nameof(EntityBaseSearch<Object>.sug)).Type("StrProperty", "./StrProperty[]")
                 ;
             AddInterface<GeoPointTs>("model/main");
             AddInterface(typeof(IProperty<>), "model/main");

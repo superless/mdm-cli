@@ -79,7 +79,7 @@ namespace mdm_gen
             AddInterface<Facet>("model/containers");
 
 
-            AddInterface(typeof(CollectionResult), "model/containers").Member(nameof(CollectionResult.Entities)).Type("EntityBaseSearch<GeoPointTs>", "./../main/EntityBaseSearch")
+            AddInterface(typeof(CollectionResult), "model/containers").Member(nameof(CollectionResult.Entities)).Type("EntityBaseSearch<GeoPointTs>[]", "./../main/EntityBaseSearch")
                 .Member(nameof(CollectionResult.IndexPropNames)).Optional()
                 .Member(nameof(CollectionResult.Filter)).Optional()
                 .Member(nameof(CollectionResult.Facets)).Optional()

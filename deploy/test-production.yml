@@ -28,7 +28,7 @@ steps:
     inputs: 
       command: pack
       packagesToPack: '**/$(name-project).csproj'       
-      arguments: '--configuration $(BuildConfiguration) /p:Version=$(SemVer)' 
+      arguments: '--configuration $(BuildConfiguration)' 
       versioningScheme: byEnvVar 
       versionEnvVar: SemVer
 

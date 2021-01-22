@@ -14,7 +14,7 @@ variables:
 
 steps:
   # toma todos los proyectos que existan además de quien tiene el nuget.
-  - task: DotNetCoreCLI@2
+  - task: DotNetCoreCLI@2 
     inputs:
       command: 'restore'
       projects: '**/*.csproj'

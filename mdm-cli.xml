@@ -4,50 +4,12 @@
         <name>mdm-cli</name>
     </assembly>
     <members>
-        <member name="M:mdm_gen.MdmGen.RecursiveDelete(System.IO.DirectoryInfo)">
+        <member name="T:mdm_gen.DataGen">
             <summary>
-            Borra recursivamente una carpeta
+            Programa de línea de comandos 
             </summary>
-            <param name="baseDir">carpeta a borrar</param>
         </member>
-        <member name="M:mdm_gen.MdmGen.StageCommitPush(System.String,System.String,System.String,System.String,System.String,System.Collections.Generic.Dictionary{System.String,System.Func{System.Boolean}})">
-            <summary>
-            Realiza commits determinados por commitMessageFIleOperations
-            genera un nuevo tag de acuerdo a la última versión.
-            envía al git determinado por los argumentos
-            </summary>
-            <param name="gitAddress">dirección del git (debería incluir el token)</param>
-            <param name="email">correo electrónico</param>
-            <param name="username">alejandro</param>
-            <param name="folder">carpeta donde se clonará el proyecto</param>
-            <param name="branch">rama donde se operará</param>
-            <param name="commitMessageFileOperations">Funciones por commit, por cada commit se ejecutará la función.</param>
-        </member>
-        <member name="M:mdm_gen.MdmGen.GenerateMdm(System.String,System.String,System.String,System.String)">
-            <summary>
-            Genera las clases en typescript desde el repositorio que se le asigne
-            para luego actualizar la rama develop del componente
-            </summary>
-            <param name="gitAddress">repositorio git donde se actualizará</param>
-            <param name="email">correo del usuario git</param>
-            <param name="username">correo del usuario</param>
-            <param name="branch">correo del usuario</param>
-        </member>
-        <member name="M:mdm_gen.MdmGen.GenerateTsModel(System.String)">
-            <summary>
-            Genera modelo typescript de acuerdo a un generator spec
-            </summary>
-            <param name="directory">carpeta donde generará el modelo</param>
-            <returns></returns>
-        </member>
-        <member name="M:mdm_gen.MdmGen.GetLoadableTypes(System.Reflection.Assembly)">
-            <summary>
-            Obtiene los tipos de un assembly (dll).
-            </summary>
-            <param name="assembly">dll obtenido desde una ruta</param>
-            <returns></returns>
-        </member>
-        <member name="M:mdm_gen.MdmGen.GetTypesFromNameSpace(System.Reflection.Assembly,System.String)">
+        <member name="M:mdm_gen.DataGen.GetTypesFromNameSpace(System.Reflection.Assembly,System.String)">
             <summary>
             Obtiene los tipos de un namespace en partícular
             </summary>
@@ -55,14 +17,14 @@
             <param name="ns">namespace a buscar</param>
             <returns></returns>
         </member>
-        <member name="M:mdm_gen.MdmGen.Gen_FileContentGenerated(System.Object,TypeGen.Core.Generator.FileContentGeneratedArgs)">
+        <member name="M:mdm_gen.DataGen.Gen_FileContentGenerated(System.Object,TypeGen.Core.Generator.FileContentGeneratedArgs)">
             <summary>
             Muestra pantalla por cada evento de generación de archivo
             </summary>
             <param name="sender"></param>
             <param name="e">detalles del archivo generado</param>
         </member>
-        <member name="M:mdm_gen.MdmGen.GetDocumentation(System.Reflection.Assembly,System.String)">
+        <member name="M:mdm_gen.DataGen.GetDocumentation(System.Reflection.Assembly,System.String)">
             <summary>
             Obtiene la documentación desde un assembly, que implemente IMdmdDocumentation.
             </summary>
@@ -70,7 +32,7 @@
             <param name="ns">namespace</param>
             <returns>elemento de documentación desde el assemby</returns>
         </member>
-        <member name="M:mdm_gen.MdmGen.GetDocumentationType(System.Reflection.Assembly,System.String)">
+        <member name="M:mdm_gen.DataGen.GetDocumentationType(System.Reflection.Assembly,System.String)">
             <summary>
             Tipo que implementa documentación.
             </summary>
@@ -78,7 +40,7 @@
             <param name="ns">namespace donde buscar</param>
             <returns>Tipo de la implementación de documentación</returns>
         </member>
-        <member name="M:mdm_gen.MdmGen.GetModel(System.Collections.Generic.IEnumerable{trifenix.connect.mdm.ts_model.PropertySearchInfo},trifenix.connect.mdm.resources.IMdmDocumentation,System.Int32)">
+        <member name="M:mdm_gen.DataGen.GetModel(System.Collections.Generic.IEnumerable{trifenix.connect.mdm.ts_model.PropertySearchInfo},trifenix.connect.mdm.resources.IMdmDocumentation,System.Int32)">
             <summary>
             Obtiene el modelo de una implementación de trifenix connect
             </summary>
@@ -87,7 +49,7 @@
             <param name="index">índice de la entidad</param>
             <returns></returns>
         </member>
-        <member name="M:mdm_gen.MdmGen.GetDictionaryFromRelated(System.Collections.Generic.IEnumerable{trifenix.connect.mdm.ts_model.PropertySearchInfo},System.Boolean,System.Int32)">
+        <member name="M:mdm_gen.DataGen.GetDictionaryFromRelated(System.Collections.Generic.IEnumerable{trifenix.connect.mdm.ts_model.PropertySearchInfo},System.Boolean,System.Int32)">
             <summary>
             Obtiene un diccionario con la metadata de propiedades
             de acuerdo al tipo y al indice.
@@ -97,14 +59,23 @@
             <param name="related">tipo de dato a buscar (str, sug, num32, etc) o entidad (local/ referencia)</param>
             <returns></returns>
         </member>
-        <member name="M:mdm_gen.MdmGen.GetEnumDictionaryFromRelated(System.Collections.Generic.IEnumerable{trifenix.connect.mdm.ts_model.PropertySearchInfo})">
+        <member name="M:mdm_gen.DataGen.GetEnumDictionaryFromRelated(System.Collections.Generic.IEnumerable{trifenix.connect.mdm.ts_model.PropertySearchInfo})">
             <summary>
             Obtiene la metadata de propiedad de tipo enuneración
             </summary>
             <param name="propSearchInfos">Colección de metadata, donde se buscará la enumeración</param>
             <returns>metadata de las enumeraciones de un elemento.</returns>
         </member>
-        <member name="M:mdm_gen.MdmGen.GenerateDataMdm(System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String)">
+        <member name="M:mdm_gen.DataGen.GenerateModelStructure(System.Collections.Generic.IEnumerable{System.Type},System.Collections.Generic.IEnumerable{System.Type},System.Collections.Generic.IEnumerable{System.Type},System.String)">
+            <summary>
+            Genera modelo, input model y enums para trifenix connect.
+            </summary>
+            <param name="models">tipos de modelo</param>
+            <param name="inputs">tipos de inputs</param>
+            <param name="mdm_enums">tipos de mdm</param>
+            <param name="srcFolder">carpeta del código fuente</param>
+        </member>
+        <member name="M:mdm_gen.DataGen.GenerateDataMdm(System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String)">
             <summary>
             Genera modelo de datos desde una dll de un proyecto
             que implemente trifenix connect.
@@ -112,13 +83,14 @@
             <param name="assembly">dll de donde obtendrá los valores</param>
             <param name="modelNamespace">namespace donde se encuentra el modelo</param>
             <param name="inputNamespace">namespace donde se encuentra el input-model</param>
+            <param name="index_model_namespace">namespace del diccionario mdm</param>
             <param name="documentNamespace">namespace donde se encuentra la implementación de IMDMDocumentation</param>
             <param name="gitRepo">repositorio donde se subirá la información</param>
             <param name="user">nombre de usuario git</param>
             <param name="email">correo git</param>
             <param name="branch">rama</param>
         </member>
-        <member name="M:mdm_gen.MdmGen.GetPropertyByIndex(System.Type,System.Int32,System.Type,trifenix.connect.mdm.resources.IMdmDocumentation)">
+        <member name="M:mdm_gen.DataGen.GetPropertyByIndex(System.Type,System.Int32,System.Type,trifenix.connect.mdm.resources.IMdmDocumentation)">
             <summary>
             Obtiene una colección de metadata desde una entidad.
             </summary>
@@ -128,11 +100,54 @@
             <param name="docs">Implmentación de IMdmDocumentation para generar la documentación</param>
             <returns>Colección de metadata</returns>
         </member>
+        <member name="M:mdm_gen.DataGen.GetPropertySearchInfo(System.Type,System.Reflection.Assembly,System.String,trifenix.connect.mdm.resources.IMdmDocumentation)">
+            <summary>
+            Obtiene metadata desde una entidad. 
+            </summary>
+            <param name="type">Tipo de entidad</param>
+            <param name="assemblyInput"></param>
+            <param name="typeNamespace">namespace del input (se buscará el input vinculado a la clase, a través de los índices)</param>
+            <param name="docs">Implmentación Documentación</param>
+            <returns>Colección de metadata</returns>
+        </member>
         <member name="T:mdm_gen.JsonMemberNameConverter">
             <summary>
             toma el nombre que se asignó en un atributo jsonProperty y se lo asigna, si existe. de lo contrario
             tomará el nombre de la propiedad.
             </summary>
+        </member>
+        <member name="M:mdm_gen.ModelGen.GenerateMdm(System.String,System.String,System.String,System.String)">
+            <summary>
+            Genera las clases en typescript desde el repositorio que se le asigne
+            para luego actualizar la rama develop del componente
+            </summary>
+            <param name="gitAddress">repositorio git donde se actualizará</param>
+            <param name="email">correo del usuario git</param>
+            <param name="username">correo del usuario</param>
+            <param name="branch">correo del usuario</param>
+        </member>
+        <member name="M:mdm_gen.ModelGen.GenerateTsModel(System.String)">
+            <summary>
+            Genera modelo typescript de acuerdo a un generator spec        /// </summary>
+            <param name="directory">carpeta donde generará el modelo</param>
+            <returns></returns>
+        </member>
+        <member name="T:mdm_gen.ModelSpec">
+            <summary>
+            Spec de generación de módelo base Mdm.
+            </summary>
+        </member>
+        <member name="M:mdm_gen.ModelSpec.OnBeforeGeneration(TypeGen.Core.SpecGeneration.OnBeforeGenerationArgs)">
+            <summary>
+            Base de la generación.
+            </summary>
+            <param name="args"></param>
+        </member>
+        <member name="M:mdm_gen.ModelSpec.OnBeforeBarrelGeneration(TypeGen.Core.SpecGeneration.OnBeforeBarrelGenerationArgs)">
+            <summary>
+            Creación de la estructura de carpetas del modelo mdm.
+            </summary>
+            <param name="args"></param>
         </member>
         <member name="T:mdm_gen.Program">
             <summary>
@@ -221,6 +236,12 @@
             </summary>
             <param name="args"></param>
         </member>
+        <member name="M:mdm_gen.Program.ProcessDataArgs(mdm_gen.Program.DataModelArguments)">
+            <summary>
+            
+            </summary>
+            <param name="ts"></param>
+        </member>
         <member name="M:mdm_gen.Program.ProcessArgs(mdm_gen.Program.ModelArguments)">
             <summary>
             Procesa el modelo de mdm en typescript
@@ -236,7 +257,7 @@
             <param name="username">nombre de usuario</param>
             <param name="branch">rama del repositorio git</param>
         </member>
-        <member name="M:mdm_gen.Program.CreateDataModel(System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String)">
+        <member name="M:mdm_gen.Program.CreateDataModel(System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String)">
             <summary>
             Genera el modelo de datos de un proyecto particular que use trifenix connect, 
             utiliza como parámetro de entrada la ruta de la dll y los namespaces para capturar la metadata
@@ -245,10 +266,43 @@
             <param name="modelNamespace">namespace del modelo</param>
             <param name="inputNamespace">namespace del input</param>
             <param name="documentNamespace">namespace del documento</param>
+            <param name="index_model_namespace">mdm diccionario</param>
             <param name="gitRepo">repositorio del git</param>
             <param name="user">usuario git</param>
             <param name="email">correo del usuario git</param>
             <param name="branch">Rama master</param>
+        </member>
+        <member name="T:mdm_gen.TypeMemberConverter">
+            <summary>
+            Retorna todos los elementos como nombre de clase, 
+            si es interface le saca la "I".
+            </summary>
+        </member>
+        <member name="M:trifenix.util.GenUtil.RecursiveDelete(System.IO.DirectoryInfo)">
+            <summary>
+            Borra recursivamente una carpeta
+            </summary>
+            <param name="baseDir">carpeta a borrar</param>
+        </member>
+        <member name="M:trifenix.util.GenUtil.GetLoadableTypes(System.Reflection.Assembly)">
+            <summary>
+            Obtiene los tipos de un assembly (dll).
+            </summary>
+            <param name="assembly">dll obtenido desde una ruta</param>
+            <returns></returns>
+        </member>
+        <member name="M:trifenix.util.GenUtil.Git.StageCommitPush(System.String,System.String,System.String,System.String,System.String,System.Collections.Generic.Dictionary{System.String,System.Func{System.Boolean}})">
+            <summary>
+            Realiza commits determinados por commitMessageFIleOperations
+            genera un nuevo tag de acuerdo a la última versión.
+            envía al git determinado por los argumentos
+            </summary>
+            <param name="gitAddress">dirección del git (debería incluir el token)</param>
+            <param name="email">correo electrónico</param>
+            <param name="username">alejandro</param>
+            <param name="folder">carpeta donde se clonará el proyecto</param>
+            <param name="branch">rama donde se operará</param>
+            <param name="commitMessageFileOperations">Funciones por commit, por cada commit se ejecutará la función.</param>
         </member>
     </members>
 </doc>

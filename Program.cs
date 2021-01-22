@@ -17,7 +17,6 @@ namespace mdm_gen
     public class Program
     {
 
-
         /// <summary>
         /// Se crea el verbo model, el cual permitirá tener los argumentos necesarios para ejecutar la creación del modelo de datos de mdm
         /// en typescript y poder publicarla en un github definido por los parámetros.
@@ -28,6 +27,9 @@ namespace mdm_gen
         public class ModelArguments {
 
 
+            /// <summary>
+            /// Git donde se actualizará el modelo.
+            /// </summary>
             [Value(0, Required = true, HelpText = "Url o ssh de la url de git del proyecto, el modelo resultado será públicado en este repositorio")]
             public string GitAddress { get; set; }
 
@@ -97,6 +99,13 @@ namespace mdm_gen
 
 
             /// <summary>
+            /// namespace de las enumeraciones de tipos de entitySearch.
+            /// </summary>
+            [Option('n', "enum-model", Required = true, HelpText = "namespace de los diccionarios de entitySearch (enums)")]
+            public string esModelNamespace { get; set; }
+
+
+            /// <summary>
             /// ruta del assembly
             /// </summary>
             [Option('a', "assembly", Required = true, HelpText = "ruta del assembly")]
@@ -137,15 +146,55 @@ namespace mdm_gen
         static void Main(string[] args)
         {
 
+            
+
             // vincula los argumentos de la ejecución con los tipos de los argumentos.
             var result = Parser.Default.ParseArguments<ModelArguments, object>(args);
 
-            // procesa los resultados, usando los argumentos como entrada.
-            result.WithParsed<ModelArguments>(ProcessArgs);
+            if (result.Tag != ParserResultType.NotParsed)
+            {
+                // procesa los resultados, usando los argumentos como entrada.
+                result.WithParsed<ModelArguments>(ProcessArgs);
+                return;
+            }
 
+            var resultData = Parser.Default.ParseArguments<DataModelArguments, object>(args);
 
+            if (resultData.Tag != ParserResultType.NotParsed)
+            {
+                // procesa los resultados, usando los argumentos como entrada.
+                resultData.WithParsed<DataModelArguments>(ProcessDataArgs);
+                
+            }
         }
 
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="ts"></param>
+        public static void ProcessDataArgs(DataModelArguments ts) {
+            var currentDitectory = AppDomain.CurrentDomain.BaseDirectory;
+            var fontPath = Path.Combine(currentDitectory, "figlet/small");
+            var fontTitle = new Figlet(Colorful.FigletFont.Load(fontPath));
+
+            Colorful.Console.WriteLine(fontTitle.ToAscii("Trifenix Connect"), Color.Red);
+
+            // metadata model
+            Colorful.Console.WriteLine(fontTitle.ToAscii("MDM"), Color.Purple);
+
+            // generación de código para trifenix connect.
+            Colorful.Console.WriteLine("Bienvenido a la generación de código de trifenix connect mdm", Color.BlueViolet);
+
+            Colorful.Console.WriteLine("Usted ha seleccionado la generación de paquetes de Typescript para generar el modelo", Color.DarkGreen);
+
+            Colorful.Console.WriteLine("Generación de paquete con la información", Color.DarkGreen);
+
+            Colorful.Console.WriteLine("Generación datos del modelo", Color.DarkGreen);
+
+            CreateDataModel(ts.Assembly, ts.modelNamespace, ts.inputNamespace, ts.docsNamespace, ts.esModelNamespace , ts.GitAddress, ts.username, ts.email, ts.branch);
+
+        }
 
 
         /// <summary>
@@ -175,23 +224,6 @@ namespace mdm_gen
             // Usa typegen para generar el módelo.
             CreateBaseModelPackage(ts.GitAddress, ts.email, ts.username, ts.branch);
 
-
-            //if (ts.GenKind == GenKind.model && string.IsNullOrWhiteSpace(ts.modelNamespace))
-            //{
-                
-            //}
-            //else if (ts.GenKind == GenKind.data) {
-
-            //    // comienzo creación de modelo de datos. 
-            //    Colorful.Console.WriteLine("Generación datos del modelo", Color.DarkGreen);
-            //    CreateDataModel(ts.Assembly, ts.modelNamespace, ts.inputNamespace, ts.docsNamespace, ts.GitAddress, ts.username, ts.email, ts.branch);
-
-                
-            //}
-
-
-
-         
         }
 
 
@@ -203,7 +235,7 @@ namespace mdm_gen
         /// <param name="username">nombre de usuario</param>
         /// <param name="branch">rama del repositorio git</param>
         public static void CreateBaseModelPackage(string gitAddress, string email, string username, string branch) {
-            MdmGen.GenerateMdm(gitAddress, email, username, branch);
+            ModelGen.GenerateMdm(gitAddress, email, username, branch);
         }
 
 
@@ -215,12 +247,13 @@ namespace mdm_gen
         /// <param name="modelNamespace">namespace del modelo</param>
         /// <param name="inputNamespace">namespace del input</param>
         /// <param name="documentNamespace">namespace del documento</param>
+        /// <param name="index_model_namespace">mdm diccionario</param>
         /// <param name="gitRepo">repositorio del git</param>
         /// <param name="user">usuario git</param>
         /// <param name="email">correo del usuario git</param>
         /// <param name="branch">Rama master</param>
-        public static void CreateDataModel(string assembly, string modelNamespace, string inputNamespace, string documentNamespace, string gitRepo, string user, string email, string branch) {
-            MdmGen.GenerateDataMdm(assembly, modelNamespace, inputNamespace, documentNamespace, gitRepo, user, email, branch);
+        public static void CreateDataModel(string assembly, string modelNamespace, string inputNamespace, string documentNamespace, string index_model_namespace, string gitRepo, string user, string email, string branch) {
+            DataGen.GenerateDataMdm(assembly, modelNamespace, inputNamespace, index_model_namespace, documentNamespace, gitRepo, user, email, branch);
         }
 
 

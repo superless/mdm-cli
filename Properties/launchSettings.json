@@ -2,7 +2,7 @@
   "profiles": {
     "mdm-gen": {
       "commandName": "Project",
-      "commandLineArgs": "typescript https://alejandro.iglesias:79417cf4848fd760603dc1d4e67ff6ede8202c68@github.com/trifenix/mdm-auto-npm.git typescript -t model -u alejandro.iglesias -e alejandro.iglesias@trifenix.io -b master"
+      "commandLineArgs": "data https://alejandro.iglesias:6f18a3d2c273d3c8e9737edf37fa1b01caa43a19@github.com/trifenix/agro-data.git -m trifenix.connect.agro_model -i trifenix.connect.agro_model_input -d trifenix.connect.agro.resources -u alejandro.iglesias -e alejandro.iglesias@trifenix.io -b master -a c:\\tmp\\trifenix.connect.agro.dll -n trifenix.connect.agro.index_model.props"
     }
   }
 }

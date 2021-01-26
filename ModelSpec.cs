@@ -83,7 +83,6 @@ namespace mdm_gen
                     .Member(nameof(ICollectionResult<object>.Facets)).Optional();
 
             AddInterface(typeof(ICollectionTableState<>), "model/containers");
-            AddInterface(typeof(ICollectionTableStateResult<>), "model/containers").CustomBase($"ICollectionResult<T>, ICollectionTableState<T>","./");
 
         }
 

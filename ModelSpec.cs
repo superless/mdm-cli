@@ -79,11 +79,11 @@ namespace mdm_gen
             AddInterface<Facet>("model/containers");
 
 
-            AddInterface(typeof(CollectionResult), "model/containers").Member(nameof(CollectionResult.Entities)).Type("EntityBaseSearch<GeoPointTs>[]", "./../main/EntityBaseSearch")
-                .Member(nameof(CollectionResult.IndexPropNames)).Optional()
-                .Member(nameof(CollectionResult.Filter)).Optional()
-                .Member(nameof(CollectionResult.Facets)).Optional()
-                .Member(nameof(CollectionResult.OnlyForTsGeneticEntity)).Type("GeoPointTs", "./../main/GeoPointTs");
+            AddInterface(typeof(ICollectionResult<>), "model/containers").Member(nameof(ICollectionResult<object>.Entities)).Type("EntityBaseSearch<T>[]", "./../main/EntityBaseSearch")
+                    .Member(nameof(ICollectionResult<object>.Facets)).Optional();
+
+            AddInterface(typeof(ICollectionTableState<>), "model/containers");
+            AddInterface(typeof(ICollectionTableStateResult<>), "model/containers");
 
         }
 

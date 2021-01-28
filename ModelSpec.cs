@@ -70,7 +70,6 @@ namespace mdm_gen
                 .Member(nameof(FilterModel.LongFilter)).Optional()
                 .Member(nameof(FilterModel.NumFilter)).Optional();
 
-
             AddInterface(typeof(FilterBase<>), "model/filters");
 
             AddInterface<OrderItem>("model/containers");

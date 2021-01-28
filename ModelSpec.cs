@@ -79,10 +79,6 @@ namespace mdm_gen
             AddInterface<Facet>("model/containers");
 
 
-            AddInterface(typeof(ICollectionResult<>), "model/containers").Member(nameof(ICollectionResult<object>.Entities)).Type("EntityBaseSearch<T>[]", "./../main/EntityBaseSearch")
-                    .Member(nameof(ICollectionResult<object>.Facets)).Optional();
-
-            AddInterface(typeof(ICollectionTableState<>), "model/containers");
 
         }
 

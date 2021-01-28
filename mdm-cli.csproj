@@ -58,7 +58,7 @@
     <PackageReference Include="Cosmonaut" Version="2.11.3" />
     <PackageReference Include="LibGit2Sharp" Version="0.26.2" />
     <PackageReference Include="TypeGen" Version="2.4.9" />
-    <PackageReference Include="trifenix.connect" Version="0.8.70" />
+    <PackageReference Include="trifenix.connect" Version="0.8.72" />
   </ItemGroup>
   
 

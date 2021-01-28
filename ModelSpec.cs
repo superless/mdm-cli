@@ -74,11 +74,6 @@ namespace mdm_gen
 
             AddInterface<OrderItem>("model/containers");
 
-
-            AddInterface<Facet>("model/containers");
-
-
-
         }
 
         /// <summary>

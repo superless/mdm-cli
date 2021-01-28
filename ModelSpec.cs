@@ -70,7 +70,6 @@ namespace mdm_gen
                 .Member(nameof(FilterModel.LongFilter)).Optional()
                 .Member(nameof(FilterModel.NumFilter)).Optional();
 
-
             AddInterface(typeof(FilterBase<>), "model/filters");
 
             AddInterface<OrderItem>("model/containers");
@@ -79,10 +78,6 @@ namespace mdm_gen
             AddInterface<Facet>("model/containers");
 
 
-            AddInterface(typeof(ICollectionResult<>), "model/containers").Member(nameof(ICollectionResult<object>.Entities)).Type("EntityBaseSearch<T>[]", "./../main/EntityBaseSearch")
-                    .Member(nameof(ICollectionResult<object>.Facets)).Optional();
-
-            AddInterface(typeof(ICollectionTableState<>), "model/containers");
 
         }
 

@@ -144,9 +144,7 @@ namespace mdm_gen
        /// </summary>
        /// <param name="args"></param>
         static void Main(string[] args)
-        {
-
-            
+        {   
 
             // vincula los argumentos de la ejecución con los tipos de los argumentos.
             var result = Parser.Default.ParseArguments<ModelArguments, object>(args);

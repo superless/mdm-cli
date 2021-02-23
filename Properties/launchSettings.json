@@ -2,7 +2,7 @@
   "profiles": {
     "mdm-gen": {
       "commandName": "Project",
-      "commandLineArgs": "data https://alejandro.iglesias:6f18a3d2c273d3c8e9737edf37fa1b01caa43a19@github.com/trifenix/agro-data.git -m trifenix.connect.agro_model -i trifenix.connect.agro_model_input -d trifenix.connect.agro.resources -u alejandro.iglesias -e alejandro.iglesias@trifenix.io -b master -a c:\\tmp\\trifenix.connect.agro.dll -n trifenix.connect.agro.index_model.props"
+      "commandLineArgs": "data https://alejandro.iglesias:59403fbd47076ac163d62cdfd352367288db414a@github.com/trifenix/agro-data.git -m trifenix.connect.agro_model -i trifenix.connect.agro_model_input -d trifenix.connect.agro.resources -u alejandro.iglesias -e alejandro.iglesias@trifenix.io -b master -a c:\\tmp\\trifenix.connect.agro.dll -n trifenix.connect.agro.index_model.props"
     }
   }
 }

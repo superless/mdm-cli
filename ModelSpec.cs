@@ -25,6 +25,7 @@ namespace mdm_gen
             AddInterface<PropertyMetadadataEnum>("data/");
             AddInterface<EntitySearchDisplayInfo>("data/");
             AddInterface<PropertyMetadata>("data/");
+            AddInterface<RelatedPropertyMetadata>("data/");
             AddInterface<ModelMetaData>("data/");
             AddInterface<EntityMetadata>("data/");
             AddInterface(typeof(EntityBaseSearch<>), "model/main")

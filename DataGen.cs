@@ -1,5 +1,4 @@
-﻿using LibGit2Sharp;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
@@ -105,29 +104,29 @@ namespace mdm_gen
                 Description = modelInfo.Description,
                 ShortName = modelInfo.ShortName,
                 Title = modelInfo.Title,
-                BoolData = GetDictionaryFromRelated(propertySearchInfo,false, (int)KindProperty.BOOL),
-                StringData = GetDictionaryFromRelated(propertySearchInfo, false, (int)KindProperty.STR),
-                DateData = GetDictionaryFromRelated(propertySearchInfo, false, (int)KindProperty.DATE),
-                DoubleData = GetDictionaryFromRelated(propertySearchInfo, false, (int)KindProperty.DBL),
+                BoolData = GetDictionaryFromRelated(propertySearchInfo, KindProperty.BOOL),
+                StringData = GetDictionaryFromRelated(propertySearchInfo, KindProperty.STR),
+                DateData = GetDictionaryFromRelated(propertySearchInfo, KindProperty.DATE),
+                DoubleData = GetDictionaryFromRelated(propertySearchInfo, KindProperty.DBL),
                 EnumData = GetEnumDictionaryFromRelated(propertySearchInfo),
-                GeoData = GetDictionaryFromRelated(propertySearchInfo, false, (int)KindProperty.GEO),
-                NumData = GetDictionaryFromRelated(propertySearchInfo, false, (int)KindProperty.NUM32),
-                relData = GetDictionaryFromRelated(propertySearchInfo, true, (int)KindEntityProperty.REFERENCE),
+                GeoData = GetDictionaryFromRelated(propertySearchInfo, KindProperty.GEO),
+                NumData = GetDictionaryFromRelated(propertySearchInfo, KindProperty.NUM32),
+                relData = GetDictionaryFromRelated(propertySearchInfo, KindEntityProperty.REFERENCE),
             };
 
 
             // los siguientes tipos existen en un entitySearch
             // pero para este caso serán agrupados de manera más general.
 
-            var suggestions = GetDictionaryFromRelated(propertySearchInfo, false, (int)KindProperty.SUGGESTION);
+            var suggestions = GetDictionaryFromRelated(propertySearchInfo, KindProperty.SUGGESTION);
 
-            var num64 = GetDictionaryFromRelated(propertySearchInfo, false, (int)KindProperty.NUM64);
+            var num64 = GetDictionaryFromRelated(propertySearchInfo, KindProperty.NUM64);
 
             var suggestionNotInString = suggestions.Where(sg => !modelDictionary.StringData.Any(s => s.Key == sg.Key));
 
             var num64NotInNum = num64.Where(sg => !modelDictionary.NumData.Any(s => s.Key == sg.Key));
 
-            var relLocal = GetDictionaryFromRelated(propertySearchInfo, true, (int)KindEntityProperty.LOCAL_REFERENCE);
+            var relLocal = GetDictionaryFromRelated(propertySearchInfo, KindEntityProperty.LOCAL_REFERENCE);
 
             if (suggestionNotInString.Any())
                 foreach (var item in suggestionNotInString)
@@ -148,6 +147,36 @@ namespace mdm_gen
 
         }
 
+        /// <summary>
+        /// Obtiene un diccionario con la metadata de propiedades
+        /// de acuerdo al tipo y al indice.
+        /// </summary>
+        /// <param name="propSearchInfos">colección de propiedades asociadas a un índice</param>
+        /// <param name="kindEntityProperty">Tipo de entidad, local o referencia, local significa que no es un objeto dentro de otro y no una referencia a una id</param>      
+        /// <returns></returns>
+        private static Dictionary<int, RelatedPropertyMetadata> GetDictionaryFromRelated(IEnumerable<PropertySearchInfo> propSearchInfos, KindEntityProperty kindEntityProperty)
+        {
+
+            // dependiendo, si la solicitud es entidad o valor, si es entidad buscará todas las entidades del elemento. 
+            // si es valor (num32, str, etc), usará el related para determinar que propiedades traerá.
+            var infos =  propSearchInfos.Where(s => s.IsEntity && s.RelatedEntity == kindEntityProperty);
+
+
+            return infos.ToDictionary(s => s.Index, g => new RelatedPropertyMetadata
+            {
+                Visible = g.Visible,
+                AutoNumeric = g.AutoNumeric,
+                NameProp = char.ToLower(g.Name[0]) + g.Name.Substring(1), // First Upper Case.
+                isArray = g.IsEnumerable,
+                Info = g.Info,
+                Required = g.IsRequired,
+                Unique = g.IsUnique,
+                HasInput = g.HasInput,
+                RealIndex = g.RealIndex
+            });
+
+        }
+
 
         /// <summary>
         /// Obtiene un diccionario con la metadata de propiedades
@@ -157,12 +186,12 @@ namespace mdm_gen
         /// <param name="isEntity">El resultado a obtener son entidades?</param>
         /// <param name="related">tipo de dato a buscar (str, sug, num32, etc) o entidad (local/ referencia)</param>
         /// <returns></returns>
-        private static Dictionary<int, PropertyMetadata> GetDictionaryFromRelated(IEnumerable<PropertySearchInfo> propSearchInfos, bool isEntity, int related)
+        private static Dictionary<int, PropertyMetadata> GetDictionaryFromRelated(IEnumerable<PropertySearchInfo> propSearchInfos, KindProperty related)
         {
 
             // dependiendo, si la solicitud es entidad o valor, si es entidad buscará todas las entidades del elemento. 
             // si es valor (num32, str, etc), usará el related para determinar que propiedades traerá.
-            var infos = isEntity?propSearchInfos.Where(s=>s.IsEntity && s.RelatedEntity== (KindEntityProperty)related):propSearchInfos.Where(s => !s.IsEntity && s.Related == (KindProperty)related).ToList();
+            var infos = propSearchInfos.Where(s => !s.IsEntity && s.Related == related).ToList();
 
 
             return infos.ToDictionary(s => s.Index, g => new PropertyMetadata
@@ -470,26 +499,30 @@ namespace mdm_gen
                 var searchAttributeInput = elemTypeInputProps.FirstOrDefault(p => p.search.Index == searchAttribute.Index && p.search.IsEntity == searchAttribute.IsEntity);
                 var grp = s.GetCustomAttributes(typeof(GroupAttribute), true).Select(s=>(GroupAttribute)s).ToList();
 
+
+                var entityAttr = searchAttribute.GetType().IsSubclassOf(typeof(EntityIndexRelatedPropertyAttribute)) ? ((EntityIndexRelatedPropertyAttribute)searchAttribute) : null;
+
+                var realindex = entityAttr != null && entityAttr.RealIndex != -1 ? entityAttr.RealIndex : searchAttribute.Index;
+
+
                 return new PropertySearchInfo
                 {
-                    IsEnumerable =  Mdm.Reflection.IsEnumerableProperty(s),
+                    IsEnumerable = Mdm.Reflection.IsEnumerableProperty(s),
                     Name = s.Name,
                     Index = searchAttribute.Index,
-                    Related = (KindProperty)(!searchAttribute.IsEntity?searchAttribute.KindIndex:0),
-                    RelatedEntity = (KindEntityProperty)(searchAttribute.IsEntity?searchAttribute.KindIndex:0),
-                    Enums = !searchAttribute.IsEntity && searchAttribute.KindIndex == (int)KindProperty.ENUM ?  Mdm.Reflection.GetDescription(s.PropertyType) : new Dictionary<int, string>(),
+                    Related = (KindProperty)(!searchAttribute.IsEntity ? searchAttribute.KindIndex : 0),
+                    RelatedEntity = (KindEntityProperty)(searchAttribute.IsEntity ? searchAttribute.KindIndex : 0),
+                    Enums = !searchAttribute.IsEntity && searchAttribute.KindIndex == (int)KindProperty.ENUM ? Mdm.Reflection.GetDescription(s.PropertyType) : new Dictionary<int, string>(),
                     IndexClass = index,
-                    Info = searchAttribute.IsEntity? docs.GetInfoFromEntity(index): docs.GetInfoFromProperty((KindProperty)searchAttribute.KindIndex, searchAttribute.Index),
+                    Info = searchAttribute.IsEntity ? docs.GetInfoFromEntity(index) : docs.GetInfoFromProperty((KindProperty)searchAttribute.KindIndex, searchAttribute.Index),
                     IsRequired = searchAttributeInput?.required != null,
                     IsUnique = searchAttributeInput?.unique != null,
                     AutoNumeric = searchAttribute.GetType() == typeof(AutoNumericDependantAttribute),
                     Visible = searchAttribute.Visible,
                     HasInput = searchAttributeInput != null,
                     IsEntity = searchAttribute.IsEntity,
-                    Group = grp?.Select(s=>s.Group).ToArray()??Array.Empty<GroupInput>()
-                    
-
-
+                    Group = grp?.Select(s => s.Group).ToArray() ?? Array.Empty<GroupInput>(),
+                    RealIndex = realindex
                 };
             }).ToArray();
 
@@ -528,7 +561,7 @@ namespace mdm_gen
         /// Obtiene metadata desde una entidad. 
         /// </summary>
         /// <param name="type">Tipo de entidad</param>
-        /// <param name="assemblyInput"></param>
+        /// <param name="assemblyInput">assembly donde se encuentran las clases</param>
         /// <param name="typeNamespace">namespace del input (se buscará el input vinculado a la clase, a través de los índices)</param>
         /// <param name="docs">Implmentación Documentación</param>
         /// <returns>Colección de metadata</returns>

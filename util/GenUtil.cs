@@ -44,24 +44,7 @@ namespace trifenix.util
         }
 
 
-        /// <summary>
-        /// Obtiene los tipos de un assembly (dll).
-        /// </summary>
-        /// <param name="assembly">dll obtenido desde una ruta</param>
-        /// <returns></returns>
-        public static IEnumerable<Type> GetLoadableTypes(this Assembly assembly)
-        {
-            if (assembly == null) throw new ArgumentNullException(nameof(assembly));
-            try
-            {
-                return assembly.GetTypes();
-            }
-            catch (ReflectionTypeLoadException e)
-            {
-                var tp = e.Types.Where(t => t == null).ToList();
-                return e.Types.Where(t => t != null);
-            }
-        }
+        
 
 
 

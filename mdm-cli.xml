@@ -21,7 +21,7 @@
             <summary>
             Muestra pantalla por cada evento de generación de archivo
             </summary>
-            <param name="sender"></param>
+            <param name="sender">objeto que envía el evento.</param>
             <param name="e">detalles del archivo generado</param>
         </member>
         <member name="M:mdm_gen.DataGen.GetDocumentation(System.Reflection.Assembly,System.String)">
@@ -49,7 +49,16 @@
             <param name="index">índice de la entidad</param>
             <returns></returns>
         </member>
-        <member name="M:mdm_gen.DataGen.GetDictionaryFromRelated(System.Collections.Generic.IEnumerable{trifenix.connect.mdm.ts_model.PropertySearchInfo},System.Boolean,System.Int32)">
+        <member name="M:mdm_gen.DataGen.GetDictionaryFromRelated(System.Collections.Generic.IEnumerable{trifenix.connect.mdm.ts_model.PropertySearchInfo},trifenix.connect.mdm.enums.KindEntityProperty)">
+            <summary>
+            Obtiene un diccionario con la metadata de propiedades
+            de acuerdo al tipo y al indice.
+            </summary>
+            <param name="propSearchInfos">colección de propiedades asociadas a un índice</param>
+            <param name="kindEntityProperty">Tipo de entidad, local o referencia, local significa que no es un objeto dentro de otro y no una referencia a una id</param>      
+            <returns></returns>
+        </member>
+        <member name="M:mdm_gen.DataGen.GetDictionaryFromRelated(System.Collections.Generic.IEnumerable{trifenix.connect.mdm.ts_model.PropertySearchInfo},trifenix.connect.mdm.enums.KindProperty)">
             <summary>
             Obtiene un diccionario con la metadata de propiedades
             de acuerdo al tipo y al indice.
@@ -74,6 +83,27 @@
             <param name="inputs">tipos de inputs</param>
             <param name="mdm_enums">tipos de mdm</param>
             <param name="srcFolder">carpeta del código fuente</param>
+        </member>
+        <member name="M:mdm_gen.DataGen.FixDataModel(System.String)">
+            <summary>
+            cambia referencias de modelos duplicados.
+            </summary>
+            <param name="srcFolder">carpeta del código fuente</param>
+        </member>
+        <member name="M:mdm_gen.DataGen.GetIndex(System.Collections.Generic.IEnumerable{System.String},System.String)">
+            <summary>
+            Obtiene el índice de una referencia (using from de typescript), si encuentra un patrón (nombre de un archivo sin extensión)
+            </summary>
+            <param name="lines">lineas con texto</param>
+            <param name="fileWithoutExtension">archivo a buscar</param>
+            <returns>índice donde encuentra el archivo</returns>
+        </member>
+        <member name="M:mdm_gen.DataGen.ReplaceReference(System.String,System.String)">
+            <summary>
+            Reemplaza las referencias, por una en la carpeta extra, con el mismo nombre de archivo.
+            </summary>
+            <param name="pathDirectory">ruta de la carpeta donde se cambiarán las referencias</param>
+            <param name="fileWithoutExtension">archivo sin extensión a buscar y reemplazar la ruta a extra</param>
         </member>
         <member name="M:mdm_gen.DataGen.GenerateDataMdm(System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String)">
             <summary>
@@ -105,15 +135,57 @@
             Obtiene metadata desde una entidad. 
             </summary>
             <param name="type">Tipo de entidad</param>
-            <param name="assemblyInput"></param>
+            <param name="assemblyInput">assembly donde se encuentran las clases</param>
             <param name="typeNamespace">namespace del input (se buscará el input vinculado a la clase, a través de los índices)</param>
             <param name="docs">Implmentación Documentación</param>
             <returns>Colección de metadata</returns>
+        </member>
+        <member name="T:mdm_gen.DataSpec">
+            <summary>
+            Generador común de modelos de trifenix connect para typescript,
+            generando 
+            1. Modelo, normalmente la base de datos.
+            2. Input-model, modelo de ingreso para compartir en front end.
+            3. diccionario de la metadata, en este caso serán las enumeraciones de los tipos de datos para entitySearch.
+            </summary>
+        </member>
+        <member name="M:mdm_gen.DataSpec.#ctor(System.Collections.Generic.IEnumerable{System.Type},System.Collections.Generic.IEnumerable{System.Type},System.Collections.Generic.IEnumerable{System.Type})">
+            <summary>
+            Toma los tipos de datos para modelo, inputs y enumeraciones, las que convertirá al ser aplicado el spec.w
+            </summary>
+            <param name="models">todos los tipos del modelo.</param>
+            <param name="inputs">todos los inputs.</param>
+            <param name="mdm_enums">enumeraciones por tipo.</param>
+        </member>
+        <member name="M:mdm_gen.DataSpec.OnBeforeGeneration(TypeGen.Core.SpecGeneration.OnBeforeGenerationArgs)">
+            <summary>
+            Creación del modelo en typescript
+            </summary>
+            <param name="args">argumentos de la configuración</param>
+        </member>
+        <member name="M:mdm_gen.DataSpec.OnBeforeBarrelGeneration(TypeGen.Core.SpecGeneration.OnBeforeBarrelGenerationArgs)">
+            <summary>
+            Crea las carpetas y los index, de cada una.
+            </summary>
+            <param name="args">argumentos de la configuración.</param>
         </member>
         <member name="T:mdm_gen.JsonMemberNameConverter">
             <summary>
             toma el nombre que se asignó en un atributo jsonProperty y se lo asigna, si existe. de lo contrario
             tomará el nombre de la propiedad.
+            </summary>
+        </member>
+        <member name="M:mdm_gen.JsonMemberNameConverter.Convert(System.String,System.Reflection.MemberInfo)">
+            <summary>
+            usa convert para quitar la primera letra si es interface.
+            </summary>
+            <param name="name">nombre de la propiedad o clase</param>
+            <param name="memberInfo">tipo de miembro (propiedad, enum, clase, interface, etc.)</param>
+            <returns></returns>
+        </member>
+        <member name="T:mdm_gen.ModelGen">
+            <summary>
+            Crea el modelo de entitySearch en Typescript.
             </summary>
         </member>
         <member name="M:mdm_gen.ModelGen.GenerateMdm(System.String,System.String,System.String,System.String)">
@@ -162,6 +234,11 @@
             https://dev.azure.com/trifenix-connect/agrofenix/_sprints/taskboard/agrofenix%20Team/agrofenix/pre-Sprint?workitem=62
             </summary>
         </member>
+        <member name="P:mdm_gen.Program.ModelArguments.GitAddress">
+            <summary>
+            Git donde se actualizará el modelo.
+            </summary>
+        </member>
         <member name="P:mdm_gen.Program.ModelArguments.username">
             <summary>
             Usuario que registra el cambio en el repositorio del componente
@@ -207,6 +284,11 @@
         <member name="P:mdm_gen.Program.DataModelArguments.docsNamespace">
             <summary>
             namespace donde de encuentra la inplementación de IMdmDocumentation.
+            </summary>
+        </member>
+        <member name="P:mdm_gen.Program.DataModelArguments.esModelNamespace">
+            <summary>
+            namespace de las enumeraciones de tipos de entitySearch.
             </summary>
         </member>
         <member name="P:mdm_gen.Program.DataModelArguments.Assembly">
@@ -278,18 +360,29 @@
             si es interface le saca la "I".
             </summary>
         </member>
+        <member name="M:mdm_gen.TypeMemberConverter.Convert(System.String,System.Type)">
+            <summary>
+            Le quita la I si es interface
+            </summary>
+            <param name="name">nombre de la propiedad o clase o interface</param>
+            <param name="type">tipo</param>
+            <returns></returns>
+        </member>
+        <member name="T:trifenix.util.GenUtil">
+            <summary>
+            Clase estática con utilidades para la generación de typescript
+            </summary>
+        </member>
         <member name="M:trifenix.util.GenUtil.RecursiveDelete(System.IO.DirectoryInfo)">
             <summary>
             Borra recursivamente una carpeta
             </summary>
             <param name="baseDir">carpeta a borrar</param>
         </member>
-        <member name="M:trifenix.util.GenUtil.GetLoadableTypes(System.Reflection.Assembly)">
+        <member name="T:trifenix.util.GenUtil.Git">
             <summary>
-            Obtiene los tipos de un assembly (dll).
+            Clase estática destinada a realizar operaciones git.
             </summary>
-            <param name="assembly">dll obtenido desde una ruta</param>
-            <returns></returns>
         </member>
         <member name="M:trifenix.util.GenUtil.Git.StageCommitPush(System.String,System.String,System.String,System.String,System.String,System.Collections.Generic.Dictionary{System.String,System.Func{System.Boolean}})">
             <summary>

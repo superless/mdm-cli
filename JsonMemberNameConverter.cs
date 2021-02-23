@@ -1,5 +1,4 @@
-﻿using Microsoft.Azure.Documents;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System.Reflection;
 using TypeGen.Core.Converters;
 

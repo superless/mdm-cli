@@ -58,7 +58,7 @@
     <PackageReference Include="LibGit2Sharp" Version="0.26.2" />
     <PackageReference Include="trifenix.connect.mdm.ts_model" Version="0.11.5" />
     <PackageReference Include="TypeGen" Version="2.4.9" />
-    <PackageReference Include="trifenix.connect" Version="0.8.85" />
+    <PackageReference Include="trifenix.connect" Version="0.8.101" />
   </ItemGroup> 
 
   <ItemGroup>

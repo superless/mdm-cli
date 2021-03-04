@@ -37,7 +37,7 @@ namespace mdm_gen
         private static IEnumerable<Type> GetTypesFromNameSpace(Assembly assmbl, string ns) {
 
             var types = assmbl.GetLoadableTypes().ToList();
-            var otherTypes1 = assmbl.GetTypes();
+            
 
 
             var rtnTypes = types.Where(x => x.FullName.StartsWith($"{ns}."));
@@ -67,8 +67,12 @@ namespace mdm_gen
         /// <returns>elemento de documentación desde el assemby</returns>
         private static IMdmDocumentation GetDocumentation(Assembly assembly, string ns) {
             var docImplementationType = GetDocumentationType(assembly, ns);
+
+            var document = (IMdmDocumentation)Mdm.Reflection.Collections.CreateEntityInstance(docImplementationType);
+
             
-            return (IMdmDocumentation)Mdm.Reflection.Collections.CreateEntityInstance(docImplementationType);
+
+            return document;
         }
 
               
@@ -80,7 +84,17 @@ namespace mdm_gen
         /// <param name="assembly">assembly del proyecto, donde se buscará</param>
         /// <param name="ns">namespace donde buscar</param>
         /// <returns>Tipo de la implementación de documentación</returns>
-        private static Type GetDocumentationType(Assembly assembly, string ns) => GetTypesFromNameSpace(assembly, ns).FirstOrDefault(s => s.GetInterface("IMdmDocumentation")!=null);
+        private static Type GetDocumentationType(Assembly assembly, string ns) => GetDocType(assembly, ns);
+
+        private static Type GetDocType(Assembly assembly, string ns)
+        {
+            var nsResult = GetTypesFromNameSpace(assembly, ns);
+
+            var rs = nsResult.FirstOrDefault(s => s.GetInterface("IMdmDocumentation") != null);
+
+            return rs;
+
+        }
 
 
         /// <summary>
@@ -182,8 +196,7 @@ namespace mdm_gen
         /// Obtiene un diccionario con la metadata de propiedades
         /// de acuerdo al tipo y al indice.
         /// </summary>
-        /// <param name="propSearchInfos">colección de propiedades asociadas a un índice</param>
-        /// <param name="isEntity">El resultado a obtener son entidades?</param>
+        /// <param name="propSearchInfos">colección de propiedades asociadas a un índice</param>        
         /// <param name="related">tipo de dato a buscar (str, sug, num32, etc) o entidad (local/ referencia)</param>
         /// <returns></returns>
         private static Dictionary<int, PropertyMetadata> GetDictionaryFromRelated(IEnumerable<PropertySearchInfo> propSearchInfos, KindProperty related)
@@ -502,8 +515,9 @@ namespace mdm_gen
 
                 var entityAttr = searchAttribute.GetType().IsSubclassOf(typeof(EntityIndexRelatedPropertyAttribute)) ? ((EntityIndexRelatedPropertyAttribute)searchAttribute) : null;
 
-                var realindex = entityAttr != null && entityAttr.RealIndex != -1 ? entityAttr.RealIndex : searchAttribute.Index;
+                int realindex = entityAttr != null && entityAttr.RealIndex != -1 ? entityAttr.RealIndex : searchAttribute.Index;
 
+                var info = searchAttribute.IsEntity ? docs.GetInfoFromEntity(searchAttribute.Index) : docs.GetInfoFromProperty((KindProperty)searchAttribute.KindIndex, searchAttribute.Index);
 
                 return new PropertySearchInfo
                 {
@@ -514,7 +528,7 @@ namespace mdm_gen
                     RelatedEntity = (KindEntityProperty)(searchAttribute.IsEntity ? searchAttribute.KindIndex : 0),
                     Enums = !searchAttribute.IsEntity && searchAttribute.KindIndex == (int)KindProperty.ENUM ? Mdm.Reflection.GetDescription(s.PropertyType) : new Dictionary<int, string>(),
                     IndexClass = index,
-                    Info = searchAttribute.IsEntity ? docs.GetInfoFromEntity(index) : docs.GetInfoFromProperty((KindProperty)searchAttribute.KindIndex, searchAttribute.Index),
+                    Info = info,
                     IsRequired = searchAttributeInput?.required != null,
                     IsUnique = searchAttributeInput?.unique != null,
                     AutoNumeric = searchAttribute.GetType() == typeof(AutoNumericDependantAttribute),

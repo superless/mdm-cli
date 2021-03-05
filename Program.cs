@@ -133,37 +133,67 @@ namespace mdm_gen
             [Option('b', "branch", Required = false, HelpText = "rama que sobrescribirá en el código typescript", Default = "master")]
             public string branch  { get; set; }
 
+            /// <summary>
+            /// token de github
+            /// </summary>
+            [Option('t', "token", Required = true, HelpText = "token de github")]
+            public string Token { get; set; }
+
+            /// <summary>
+            /// Url donde modificará y generará un nuevo script.
+            /// </summary>
+            [Option('s', "scripts", Required = true, HelpText = "repositorio de scripts donde se guardará el json con la metadata")]
+            public string Scripts { get; set; }
+
+
+            /// <summary>
+            /// Url donde modificará y generará un nuevo script.
+            /// </summary>
+            [Option('v', "versión", Required = true, HelpText = "versión del modelo que se generará como script")]
+            public string Version { get; set; }
+
+
+            /// <summary>
+            /// Url donde modificará y generará un nuevo script.
+            /// </summary>
+            [Option('f', "entity-file", Required = true, HelpText = "nombre del modelo que será usado para guardar el archivo")]
+            public string ModelName { get; set; }
+
+
+
+
+
+
+
 
 
         }
 
-       
-       /// <summary>
-       /// Punto de entrada de la aplicación donde automáticamente se determina el flujo de acuerdo 
-       /// a los argumentos en la ejecución.
-       /// </summary>
-       /// <param name="args"></param>
+
+        /// <summary>
+        /// Punto de entrada de la aplicación donde automáticamente se determina el flujo de acuerdo 
+        /// a los argumentos en la ejecución.
+        /// </summary>
+        /// <param name="args"></param>
         static void Main(string[] args)
         {   
 
             // vincula los argumentos de la ejecución con los tipos de los argumentos.
-            var result = Parser.Default.ParseArguments<ModelArguments, object>(args);
+            
 
-            if (result.Tag != ParserResultType.NotParsed)
-            {
-                // procesa los resultados, usando los argumentos como entrada.
-                result.WithParsed<ModelArguments>(ProcessArgs);
-                return;
-            }
+            Parser.Default.ParseArguments<ModelArguments, DataModelArguments>(args).MapResult(
+                (ModelArguments s) => {
+                    ProcessArgs(s);
+                    return 1;
+                },
+                (DataModelArguments s) => {
+                    ProcessDataArgs(s);
+                    return 1;
+                },
+                err => 1
+                );
 
-            var resultData = Parser.Default.ParseArguments<DataModelArguments, object>(args);
-
-            if (resultData.Tag != ParserResultType.NotParsed)
-            {
-                // procesa los resultados, usando los argumentos como entrada.
-                resultData.WithParsed<DataModelArguments>(ProcessDataArgs);
-                
-            }
+            
         }
 
 
@@ -190,7 +220,7 @@ namespace mdm_gen
 
             Colorful.Console.WriteLine("Generación datos del modelo", Color.DarkGreen);
 
-            CreateDataModel(ts.Assembly, ts.modelNamespace, ts.inputNamespace, ts.docsNamespace, ts.esModelNamespace , ts.GitAddress, ts.username, ts.email, ts.branch);
+            CreateDataModel(ts.Assembly, ts.modelNamespace, ts.inputNamespace, ts.docsNamespace, ts.esModelNamespace , ts.GitAddress, ts.username, ts.email, ts.branch, ts.Token, ts.Scripts, ts.ModelName, ts.Version);
 
         }
 
@@ -250,8 +280,12 @@ namespace mdm_gen
         /// <param name="user">usuario git</param>
         /// <param name="email">correo del usuario git</param>
         /// <param name="branch">Rama master</param>
-        public static void CreateDataModel(string assembly, string modelNamespace, string inputNamespace, string documentNamespace, string index_model_namespace, string gitRepo, string user, string email, string branch) {
-            DataGen.GenerateDataMdm(assembly, modelNamespace, inputNamespace, index_model_namespace, documentNamespace, gitRepo, user, email, branch);
+        /// <param name="token">token del github</param>
+        /// <param name="scripts">url del github donde se alojará el script</param>
+        /// <param name="modelName">nombre del modelo o archivo que será usado en la carpeta de scripts</param>
+        /// <param name="version">versión del modelo a generar</param>
+        public static void CreateDataModel(string assembly, string modelNamespace, string inputNamespace, string documentNamespace, string index_model_namespace, string gitRepo, string user, string email, string branch, string token, string scripts, string modelName, string version) {
+            DataGen.GenerateDataMdm(assembly, modelNamespace, inputNamespace, index_model_namespace, documentNamespace, gitRepo, user, email, branch, token, scripts, modelName, version);
         }
 
 

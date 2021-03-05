@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using trifenix.git;
 using trifenix.util;
 using TypeGen.Core.Converters;
 using TypeGen.Core.Generator;
@@ -32,11 +33,12 @@ namespace mdm_gen
             // carpeta donde se incorporará el código fuente generado.
             var srcFolder = Path.Combine(folder, "src");
 
+            var gitRepo = new GitHubRepo(gitAddress, branch, username, email);
 
             // elimina y agrega el contenido.
-            GenUtil.Git.StageCommitPush(gitAddress, email, username, folder, branch, new Dictionary<string, Func<bool>> {
+            gitRepo.Commit(new Dictionary<string, Func<bool>> {
                 { "Eliminando archivos generados anteriormente", ()=>GenUtil.RecursiveDelete(new DirectoryInfo(srcFolder)) },
-                { "+semver: patch", () => GenerateTsModel(srcFolder) }
+                { "Generando modelo de datos", () => GenerateTsModel(srcFolder) }
 
             });
 

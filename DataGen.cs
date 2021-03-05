@@ -12,6 +12,7 @@ using trifenix.connect.mdm.resources;
 using trifenix.connect.mdm.ts_model;
 using trifenix.connect.mdm_attributes;
 using trifenix.connect.util;
+using trifenix.git;
 using trifenix.util;
 using TypeGen.Core.Converters;
 using TypeGen.Core.Generator;
@@ -457,10 +458,11 @@ namespace mdm_gen
             // archivo a generar.
             var file =  Path.Combine(srcFolder, "metadata/mdm.ts");
 
+            var repo = new GitHubRepo(gitRepo, branch, user, email);
 
 
             // commit y envío.
-            GenUtil.Git.StageCommitPush(gitRepo, email, user, folder, branch, new Dictionary<string, Func<bool>> {
+            repo.Commit(new Dictionary<string, Func<bool>> {
                 { "Eliminando archivos generados anteriormente", ()=>GenUtil.RecursiveDelete(new DirectoryInfo(srcFolder)) },
                 { "creando modelo", ()=> {
                     GenerateModelStructure(modelTypes, inputTypes, enumTypes, srcFolder );
@@ -473,7 +475,7 @@ namespace mdm_gen
 
 
             // genera el json con datos
-           
+            
 
 
 

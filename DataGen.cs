@@ -355,6 +355,19 @@ namespace mdm_gen
             }
 
         }
+        /// <summary>
+        /// Configura una url de github con el token
+        /// </summary>
+        /// <param name="repository"></param>
+        /// <param name="token"></param>
+        /// <param name="username"></param>
+        /// <returns></returns>
+        public static string SetGithubToken(string repository, string token, string username)
+        {
+            var uriRepo = new Uri(repository);
+
+            return $"https://{username}:{token}@{uriRepo.DnsSafeHost}{uriRepo.LocalPath}";
+        }
 
         /// <summary>
         /// Genera modelo de datos desde una dll de un proyecto
@@ -369,7 +382,11 @@ namespace mdm_gen
         /// <param name="user">nombre de usuario git</param>
         /// <param name="email">correo git</param>
         /// <param name="branch">rama</param>
-        public static void GenerateDataMdm(string assembly, string modelNamespace, string inputNamespace, string index_model_namespace, string documentNamespace, string gitRepo, string user, string email, string branch)
+        /// <param name="token">token del github</param>
+        /// <param name="scripts">url del github donde se creará el objeto metatadata</param>
+        /// <param name="modelName">nombre del archivo en el repositorio</param>
+        /// <param name="version">versión de la metadata</param>
+        public static void GenerateDataMdm(string assembly, string modelNamespace, string inputNamespace, string index_model_namespace, string documentNamespace, string gitRepo, string user, string email, string branch, string token, string scripts, string modelName, string version)
         {
 
             // assembly
@@ -458,7 +475,9 @@ namespace mdm_gen
             // archivo a generar.
             var file =  Path.Combine(srcFolder, "metadata/mdm.ts");
 
-            var repo = new GitHubRepo(gitRepo, branch, user, email);
+            var strRepo = SetGithubToken(gitRepo, token, user);
+
+            var repo = new GitHubRepo(strRepo, branch, user, email);
 
 
             // commit y envío.
@@ -474,8 +493,10 @@ namespace mdm_gen
             } } });;
 
 
-            // genera el json con datos
-            
+
+            var repoTyped = new GitHubRepo<ModelMetaData>(SetGithubToken(scripts, token, user), branch, user, email);
+
+            repoTyped.SaveFile($"static/models/{modelName}.{version}.json", $"{modelName}.{version}", modelDate);
 
 
 

@@ -105,11 +105,7 @@ namespace mdm_gen
             public string esModelNamespace { get; set; }
 
 
-            /// <summary>
-            /// ruta del assembly
-            /// </summary>
-            [Option('a', "assembly", Required = true, HelpText = "ruta del assembly")]
-            public string Assembly { get; set; }
+       
 
 
             /// <summary>
@@ -206,7 +202,22 @@ namespace mdm_gen
             var fontPath = Path.Combine(currentDitectory, "figlet/small");
             var fontTitle = new Figlet(Colorful.FigletFont.Load(fontPath));
 
+            var environment = Environment.CurrentDirectory;
+
+            string[] files = Directory.GetFiles(environment, "*.dll", SearchOption.AllDirectories);
+
+
+            var assembly = files.FirstOrDefault(s => s.Contains("CONNECT"));
+
+            if (assembly == null)
+            {
+                Colorful.Console.WriteLine("No encontró dll con release CONNECT", Color.Red);
+                return;
+            }
+
             Colorful.Console.WriteLine(fontTitle.ToAscii("Trifenix Connect"), Color.Red);
+
+            Colorful.Console.WriteLine($"Directory : {environment}", Color.Green);
 
             // metadata model
             Colorful.Console.WriteLine(fontTitle.ToAscii("MDM"), Color.Purple);
@@ -220,7 +231,7 @@ namespace mdm_gen
 
             Colorful.Console.WriteLine("Generación datos del modelo", Color.DarkGreen);
 
-            CreateDataModel(ts.Assembly, ts.modelNamespace, ts.inputNamespace, ts.docsNamespace, ts.esModelNamespace , ts.GitAddress, ts.username, ts.email, ts.branch, ts.Token, ts.Scripts, ts.ModelName, ts.Version);
+            CreateDataModel(assembly, ts.modelNamespace, ts.inputNamespace, ts.docsNamespace, ts.esModelNamespace , ts.GitAddress, ts.username, ts.email, ts.branch, ts.Token, ts.Scripts, ts.ModelName, ts.Version);
 
         }
 

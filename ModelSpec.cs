@@ -28,6 +28,12 @@ namespace mdm_gen
             AddInterface<RelatedPropertyMetadata>("data/");
             AddInterface<ModelMetaData>("data/");
             AddInterface<EntityMetadata>("data/");
+
+            AddInterface<InputDetails>("data/");
+            AddInterface<InputPropDetails>("data/");
+            AddInterface<InputPropRelatedDetails>("data/");
+            AddInterface<ModelDetails>("data/");
+
             AddInterface(typeof(EntityBaseSearch<>), "model/main")
                 .Member(nameof(EntityBaseSearch<Object>.bl)).Type("BoolProperty[]", "./BoolProperty")
                 .Member(nameof(EntityBaseSearch<Object>.dbl)).Type("DblProperty[]", "./DblProperty")                
@@ -55,6 +61,9 @@ namespace mdm_gen
             AddInterface<StrProperty>("model/main");
             AddEnum<PhisicalDevice>("model/enums");
             AddEnum<FilterType>("model/enums");
+            AddEnum<KindProperty>("model/enums");
+            AddEnum<EntityKind>("model/enums");
+            AddEnum<Validation>("model/enums");
             AddInterface<FilterGlobalEntityInput>("model/filters").Member(nameof(FilterGlobalEntityInput.FilterChilds)).Optional();
             AddInterface<GroupInput>("model/containers")
                 .Member(nameof(GroupInput.ColumnProportion)).Optional()                

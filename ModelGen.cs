@@ -78,7 +78,7 @@ namespace mdm_gen
 
                 return true;
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 return false;
 

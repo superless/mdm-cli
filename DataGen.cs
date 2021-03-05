@@ -392,11 +392,7 @@ namespace mdm_gen
             // assembly
             var assemblyInput = Assembly.LoadFrom(assembly);
 
-            // carpeta temporal, donde se creará el modelo
-            var folder = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), $"mdm-data-{Guid.NewGuid()}")).FullName;
-
-            // carpeta código fuente.
-            var srcFolder = Path.Combine(folder, "src");
+            
 
             // modelo
             var modelTypes = GetTypesFromNameSpace(assemblyInput, modelNamespace);
@@ -466,18 +462,21 @@ namespace mdm_gen
 
 
 
+
+
+
+
+            var strRepo = SetGithubToken(gitRepo, token, user);
+            var repo = new GitHubRepo(strRepo, branch, user, email);
             
 
-
-            
-
+            // carpeta temporal, donde se creará el modelo
+            var folder = repo.Clone();
+            // carpeta código fuente.
+            var srcFolder = Path.Combine(folder, "src");
 
             // archivo a generar.
             var file =  Path.Combine(srcFolder, "metadata/mdm.ts");
-
-            var strRepo = SetGithubToken(gitRepo, token, user);
-
-            var repo = new GitHubRepo(strRepo, branch, user, email);
 
 
             // commit y envío.

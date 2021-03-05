@@ -27,14 +27,17 @@ namespace mdm_gen
 
 
             // carpeta temporal donde se almacenará, ojo, esto puede causar complicaciones en ambientes linux.
-            var folder = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), $"mdm-gen-{Guid.NewGuid()}")).FullName;
+            
 
 
-            // carpeta donde se incorporará el código fuente generado.
-            var srcFolder = Path.Combine(folder, "src");
+            
 
             var gitRepo = new GitHubRepo(gitAddress, branch, username, email);
 
+            var folder = gitRepo.Clone();
+
+            // carpeta donde se incorporará el código fuente generado.
+            var srcFolder = Path.Combine(folder, "src");
             // elimina y agrega el contenido.
             gitRepo.Commit(new Dictionary<string, Func<bool>> {
                 { "Eliminando archivos generados anteriormente", ()=>GenUtil.RecursiveDelete(new DirectoryInfo(srcFolder)) },

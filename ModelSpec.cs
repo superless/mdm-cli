@@ -3,7 +3,9 @@ using trifenix.connect.mdm.entity_model;
 using trifenix.connect.mdm.enums;
 using trifenix.connect.mdm.ts_model;
 using trifenix.connect.mdm.ts_model.props;
+using trifenix.connect.model;
 using trifenix.connect.ts_model.enums;
+using trifenix.versions.model;
 using TypeGen.Core.SpecGeneration;
 
 
@@ -27,12 +29,31 @@ namespace mdm_gen
             AddInterface<PropertyMetadata>("data/");
             AddInterface<RelatedPropertyMetadata>("data/");
             AddInterface<ModelMetaData>("data/");
-            AddInterface<EntityMetadata>("data/");
+            AddInterface<VersionStructure>("data/");
 
-            AddInterface<InputDetails>("data/");
+            AddInterface<EntityMetadata>("data/");
+            AddInterface<DeleteItem>("data/");
+            AddInterface<CommitVersion>("data/");
+            AddInterface<Dependency>("data/");
+            AddInterface<CommitPackageVersion>("data/");
+            AddInterface<Semantic>("data/");
+            AddInterface<GlobalFilters>("data/");
+            AddInterface<EnumDescription>("data/");
+            AddInterface<MainDocumentation>("data/");
+            AddInterface<GroupMenuViewer>("data/");
+            AddInterface<GroupMenuItem>("data/");
+            AddInterface<EnumDescription>("data/");
+            AddInterface<ToProcessClass>("data/");
+            AddInterface<ToValue>("data/");
+            AddInterface<RelatedItem>("data/");
+            AddInterface<InputDetails>("data/").Member(nameof(InputDetails.RelatedInputs)).Type("{ [key: string]: InputDetails; }");
+            AddInterface<ModelDetails>("data/").Member(nameof(ModelDetails.RelatedInputs)).Type("{ [key: string]: ModelDetails; }");
+
+            AddInterface<ItemEnumDescription>("data/");
+            AddInterface<PathToFiltersValue>("data/");
             AddInterface<InputPropDetails>("data/");
             AddInterface<InputPropRelatedDetails>("data/");
-            AddInterface<ModelDetails>("data/");
+            
 
             AddInterface(typeof(EntityBaseSearch<>), "model/main")
                 .Member(nameof(EntityBaseSearch<Object>.bl)).Type("BoolProperty[]", "./BoolProperty")
@@ -66,8 +87,6 @@ namespace mdm_gen
             AddEnum<Validation>("model/enums");
             AddInterface<FilterGlobalEntityInput>("model/filters").Member(nameof(FilterGlobalEntityInput.FilterChilds)).Optional();
             AddInterface<GroupInput>("model/containers")
-                .Member(nameof(GroupInput.ColumnProportion)).Optional()                
-                .Member(nameof(GroupInput.OrderIndex)).Optional()
                 .Member(nameof(GroupInput.Device)).Optional();
             AddInterface<GroupMenu>("model/containers");
             AddInterface<FilterModel>("model/filters")

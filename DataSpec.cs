@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using trifenix.connect.input;
+using trifenix.connect.model;
 using trifenix.mock;
-using trifenix.model;
+
 using TypeGen.Core.SpecGeneration;
 
 

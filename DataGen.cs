@@ -10,6 +10,7 @@ using System.Reflection;
 using trifenix.connect.mdm.enums;
 using trifenix.connect.mdm.resources;
 using trifenix.connect.mdm.ts_model;
+using trifenix.connect.mdm.validation_attributes;
 using trifenix.connect.mdm_attributes;
 using trifenix.connect.util;
 using trifenix.git;
